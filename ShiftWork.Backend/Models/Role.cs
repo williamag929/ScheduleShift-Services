@@ -4,7 +4,9 @@
 	{
 		public string RoleId { get; set; }
 		public string RoleName { get; set; }
-		public List<UserRole> UserRole { get; set; }
+		public string CompanyId { get; set; }
+		public Company Company { get; set; }
+
 	}
 
 

@@ -12,5 +12,6 @@
 		public int AreaId { get; set; }
 		public int LocationId { get; set; }
 		public string TagColor { get; set; }
+		public string CompanyId { get; set; }
 	}
 }

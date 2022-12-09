@@ -31,7 +31,8 @@ builder.Services.AddCors(options =>
                       {
                           builder.WithOrigins("http://localhost:4200", 
                               "https://localhost:4200",
-                              "https://main.d23hrr0t3ac536.amplifyapp.com")
+                              "https://main.d23hrr0t3ac536.amplifyapp.com",
+                              "https://williamag929-cuddly-space-garbanzo-57v9vvrg9q3px7-4200.preview.app.github.dev")
                             .AllowAnyHeader()
                             .AllowAnyMethod()
                             .AllowCredentials();

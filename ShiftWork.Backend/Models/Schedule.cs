@@ -16,6 +16,13 @@
 		public TaskShift TaskShift { get; set; }
 		public Area Area { get; set; }
 		public Location Location { get; set; }
+		public string CompanyId { get; set; }
+		public Company Company { get; set; }
+		public bool IsActive { get; set; }
+		public bool IsDeleted { get; set; }
+		public DateTime Created { get; set; } = DateTime.UtcNow;
+		public DateTime Updated { get; set; }
+		public DateTime Deleted { get; set; }
 
 	}
 }
