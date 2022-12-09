@@ -14,7 +14,6 @@
         public string? GeoLocationStart { get; set; }
         public string? GeoLocationEnd { get; set; }
         public string CompanyId { get; set; }
-        public Company Company { get; set; }
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime Created { get; set; } = DateTime.UtcNow;

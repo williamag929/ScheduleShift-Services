@@ -29,22 +29,22 @@ namespace ShiftWork.Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Area>>> GetArea()
         {
-          if (_context.Area == null)
+          if (_context.Areas == null)
           {
               return NotFound();
           }
-            return await _context.Area.ToListAsync();
+            return await _context.Areas.ToListAsync();
         }
 
         // GET: api/Areas/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Area>> GetArea(int id)
         {
-          if (_context.Area == null)
+          if (_context.Areas == null)
           {
               return NotFound();
           }
-            var area = await _context.Area.FindAsync(id);
+            var area = await _context.Areas.FindAsync(id);
 
             if (area == null)
             {
@@ -92,16 +92,16 @@ namespace ShiftWork.Backend.Controllers
         [HttpPost]
         public async Task<ActionResult<Area>> PostArea(AreaDto areaDto)
         {
-            if (_context.Area == null)
+            if (_context.Areas == null)
             {
                 return Problem("Entity set 'ShiftWorkContext.Area'  is null.");
             }
 
             var area = _mapper.Map<Area>(areaDto);
 
-            area.CreatedDate = DateTime.UtcNow;
+            area.Created = DateTime.UtcNow;
 
-            _context.Area.Add(area);
+            _context.Areas.Add(area);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetArea", new { id = area.AreaId }, area);
@@ -111,17 +111,17 @@ namespace ShiftWork.Backend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteArea(int id)
         {
-            if (_context.Area == null)
+            if (_context.Areas == null)
             {
                 return NotFound();
             }
-            var area = await _context.Area.FindAsync(id);
+            var area = await _context.Areas.FindAsync(id);
             if (area == null)
             {
                 return NotFound();
             }
 
-            _context.Area.Remove(area);
+            _context.Areas.Remove(area);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -129,7 +129,7 @@ namespace ShiftWork.Backend.Controllers
 
         private bool AreaExists(int id)
         {
-            return (_context.Area?.Any(e => e.AreaId == id)).GetValueOrDefault();
+            return (_context.Areas?.Any(e => e.AreaId == id)).GetValueOrDefault();
         }
     }
 }

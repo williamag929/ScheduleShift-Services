@@ -29,22 +29,22 @@ namespace ShiftWork.Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Schedule>>> GetSchedule()
         {
-          if (_context.Schedule == null)
+          if (_context.Schedules == null)
           {
               return NotFound();
           }
-            return await _context.Schedule.ToListAsync();
+            return await _context.Schedules.ToListAsync();
         }
 
         // GET: api/Schedules/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Schedule>> GetSchedule(string id)
         {
-          if (_context.Schedule == null)
+          if (_context.Schedules == null)
           {
               return NotFound();
           }
-            var schedule = await _context.Schedule.FindAsync(id);
+            var schedule = await _context.Schedules.FindAsync(id);
 
             if (schedule == null)
             {
@@ -95,11 +95,11 @@ namespace ShiftWork.Backend.Controllers
         {
             var schedule = _mapper.Map<Schedule>(scheduleDto);
 
-            if (_context.Schedule == null)
+            if (_context.Schedules == null)
           {
               return Problem("Entity set 'ShiftWorkContext.Schedule'  is null.");
           }
-            _context.Schedule.Add(schedule);
+            _context.Schedules.Add(schedule);
             try
             {
                 await _context.SaveChangesAsync();
@@ -123,17 +123,17 @@ namespace ShiftWork.Backend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSchedule(string id)
         {
-            if (_context.Schedule == null)
+            if (_context.Schedules == null)
             {
                 return NotFound();
             }
-            var schedule = await _context.Schedule.FindAsync(id);
+            var schedule = await _context.Schedules.FindAsync(id);
             if (schedule == null)
             {
                 return NotFound();
             }
 
-            _context.Schedule.Remove(schedule);
+            _context.Schedules.Remove(schedule);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -141,7 +141,7 @@ namespace ShiftWork.Backend.Controllers
 
         private bool ScheduleExists(int id)
         {
-            return (_context.Schedule?.Any(e => e.ScheduleId == id)).GetValueOrDefault();
+            return (_context.Schedules?.Any(e => e.ScheduleId == id)).GetValueOrDefault();
         }
     }
 }

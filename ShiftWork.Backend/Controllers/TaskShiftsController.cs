@@ -29,22 +29,22 @@ namespace ShiftWork.Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TaskShift>>> GetTaskShift()
         {
-          if (_context.TaskShift == null)
+          if (_context.TaskShifts == null)
           {
               return NotFound();
           }
-            return await _context.TaskShift.ToListAsync();
+            return await _context.TaskShifts.ToListAsync();
         }
 
         // GET: api/TaskShifts/5
         [HttpGet("{id}")]
         public async Task<ActionResult<TaskShift>> GetTaskShift(int id)
         {
-          if (_context.TaskShift == null)
+          if (_context.TaskShifts == null)
           {
               return NotFound();
           }
-            var taskShift = await _context.TaskShift.FindAsync(id);
+            var taskShift = await _context.TaskShifts.FindAsync(id);
 
             if (taskShift == null)
             {
@@ -93,7 +93,7 @@ namespace ShiftWork.Backend.Controllers
         [HttpPost]
         public async Task<ActionResult<TaskShift>> PostTaskShift(TaskShiftDto taskShiftDto)
         {
-            if (_context.TaskShift == null)
+            if (_context.TaskShifts == null)
             {
                 return Problem("Entity set 'ShiftWorkContext.TaskShift'  is null.");
             }
@@ -101,7 +101,7 @@ namespace ShiftWork.Backend.Controllers
             var taskShift = _mapper.Map<TaskShift>(taskShiftDto);
 
             taskShift.CreatedDate = DateTime.Now;
-            _context.TaskShift.Add(taskShift);
+            _context.TaskShifts.Add(taskShift);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetTaskShift", new { id = taskShift.TaskShiftId }, taskShift);
@@ -111,17 +111,17 @@ namespace ShiftWork.Backend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTaskShift(int id)
         {
-            if (_context.TaskShift == null)
+            if (_context.TaskShifts == null)
             {
                 return NotFound();
             }
-            var taskShift = await _context.TaskShift.FindAsync(id);
+            var taskShift = await _context.TaskShifts.FindAsync(id);
             if (taskShift == null)
             {
                 return NotFound();
             }
 
-            _context.TaskShift.Remove(taskShift);
+            _context.TaskShifts.Remove(taskShift);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -129,7 +129,7 @@ namespace ShiftWork.Backend.Controllers
 
         private bool TaskShiftExists(int id)
         {
-            return (_context.TaskShift?.Any(e => e.TaskShiftId == id)).GetValueOrDefault();
+            return (_context.TaskShifts?.Any(e => e.TaskShiftId == id)).GetValueOrDefault();
         }
     }
 }

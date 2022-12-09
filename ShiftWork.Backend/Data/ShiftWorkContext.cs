@@ -14,22 +14,30 @@ namespace ShiftWork.Backend.Data
         {
         }
 
-        public DbSet<ShiftWork.Backend.Models.Person> Person { get; set; } = default!;
+        public DbSet<ShiftWork.Backend.Models.Person> People { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Person>().ToTable("Person");
         }
 
-        public DbSet<ShiftWork.Backend.Models.Location>? Location { get; set; }
+        public DbSet<ShiftWork.Backend.Models.Location>? Locations { get; set; }
+        public DbSet<ShiftWork.Backend.Models.Area>? Areas { get; set; }
+        public DbSet<ShiftWork.Backend.Models.Role>? Roles { get; set; }
+        public DbSet<ShiftWork.Backend.Models.TaskShift>? TaskShifts { get; set; }
+        public DbSet<ShiftWork.Backend.Models.ScheduleShift>? ScheduleShifts { get; set; }
+        public DbSet<ShiftWork.Backend.Models.Schedule>? Schedules { get; set; }
+        public DbSet<ShiftWork.Backend.Models.Company>? Companies { get; set; }
+        public DbSet<ShiftWork.Backend.Models.Permission>? Permissions { get; set; }
+        public DbSet<ShiftWork.Backend.Models.RolePermission>? RolePermissions { get; set; }
+        public DbSet<ShiftWork.Backend.Models.UserCompany>? userCompanies { get; set; }
+        public DbSet<ShiftWork.Backend.Models.UserProfile>? UserProfiles { get; set; }
+        public DbSet<ShiftWork.Backend.Models.UserRole>? userRoles { get; set; }
+        public DbSet<ShiftWork.Backend.Models.Country>? Countries { get; set; }
+        public DbSet<ShiftWork.Backend.Models.Time_Zone>? TimeZones { get; set; }
 
-        public DbSet<ShiftWork.Backend.Models.Area>? Area { get; set; }
 
-        public DbSet<ShiftWork.Backend.Models.Role>? Role { get; set; }
 
-        public DbSet<ShiftWork.Backend.Models.TaskShift>? TaskShift { get; set; }
-        public DbSet<ShiftWork.Backend.Models.ScheduleShift>? ScheduleShift { get; set; }
-        public DbSet<ShiftWork.Backend.Models.Schedule>? Schedule { get; set; }
 
     }
 }

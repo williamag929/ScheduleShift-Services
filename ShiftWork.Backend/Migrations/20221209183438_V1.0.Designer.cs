@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ShiftWork.Backend.Data;
 
@@ -11,9 +12,10 @@ using ShiftWork.Backend.Data;
 namespace ShiftWork.Backend.Migrations
 {
     [DbContext(typeof(ShiftWorkContext))]
-    partial class ShiftWorkContextModelSnapshot : ModelSnapshot
+    [Migration("20221209183438_V1.0")]
+    partial class V10
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -103,27 +105,6 @@ namespace ShiftWork.Backend.Migrations
                     b.HasKey("CompanyId");
 
                     b.ToTable("Companies");
-                });
-
-            modelBuilder.Entity("ShiftWork.Backend.Models.Country", b =>
-                {
-                    b.Property<int>("CountryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CountryId"), 1L, 1);
-
-                    b.Property<string>("CountryCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CountryName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("CountryId");
-
-                    b.ToTable("Countries");
                 });
 
             modelBuilder.Entity("ShiftWork.Backend.Models.Location", b =>
@@ -480,41 +461,6 @@ namespace ShiftWork.Backend.Migrations
                     b.HasKey("TaskShiftId");
 
                     b.ToTable("TaskShifts");
-                });
-
-            modelBuilder.Entity("ShiftWork.Backend.Models.Time_Zone", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("Abbreviation")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CountryCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DST")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("GmtOffset")
-                        .HasColumnType("int");
-
-                    b.Property<double>("Time_Start")
-                        .HasColumnType("float");
-
-                    b.Property<string>("ZoneName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TimeZones");
                 });
 
             modelBuilder.Entity("ShiftWork.Backend.Models.UserCompany", b =>

@@ -28,22 +28,22 @@ namespace ShiftWork.Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ScheduleShift>>> GetScheduleShift()
         {
-          if (_context.ScheduleShift == null)
+          if (_context.ScheduleShifts == null)
           {
               return NotFound();
           }
-            return await _context.ScheduleShift.ToListAsync();
+            return await _context.ScheduleShifts.ToListAsync();
         }
 
         // GET: api/ScheduleShifts/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ScheduleShift>> GetScheduleShift(int id)
         {
-          if (_context.ScheduleShift == null)
+          if (_context.ScheduleShifts == null)
           {
               return NotFound();
           }
-            var scheduleShift = await _context.ScheduleShift.FindAsync(id);
+            var scheduleShift = await _context.ScheduleShifts.FindAsync(id);
 
             if (scheduleShift == null)
             {
@@ -89,11 +89,11 @@ namespace ShiftWork.Backend.Controllers
         [HttpPost]
         public async Task<ActionResult<ScheduleShift>> PostScheduleShift(ScheduleShift scheduleShift)
         {
-          if (_context.ScheduleShift == null)
+          if (_context.ScheduleShifts == null)
           {
               return Problem("Entity set 'ShiftWorkContext.ScheduleShift'  is null.");
           }
-            _context.ScheduleShift.Add(scheduleShift);
+            _context.ScheduleShifts.Add(scheduleShift);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetScheduleShift", new { id = scheduleShift.ScheduleShiftId }, scheduleShift);
@@ -103,17 +103,17 @@ namespace ShiftWork.Backend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteScheduleShift(int id)
         {
-            if (_context.ScheduleShift == null)
+            if (_context.ScheduleShifts == null)
             {
                 return NotFound();
             }
-            var scheduleShift = await _context.ScheduleShift.FindAsync(id);
+            var scheduleShift = await _context.ScheduleShifts.FindAsync(id);
             if (scheduleShift == null)
             {
                 return NotFound();
             }
 
-            _context.ScheduleShift.Remove(scheduleShift);
+            _context.ScheduleShifts.Remove(scheduleShift);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -121,7 +121,7 @@ namespace ShiftWork.Backend.Controllers
 
         private bool ScheduleShiftExists(int id)
         {
-            return (_context.ScheduleShift?.Any(e => e.ScheduleShiftId == id)).GetValueOrDefault();
+            return (_context.ScheduleShifts?.Any(e => e.ScheduleShiftId == id)).GetValueOrDefault();
         }
     }
 }

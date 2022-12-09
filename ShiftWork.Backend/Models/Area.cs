@@ -12,7 +12,7 @@
         public DateTime Updated { get; set; }
         public DateTime Deleted { get; set; }
         public Location Location { get; set; }
-        public Company Company { get; set; }
+
 
     }
 }

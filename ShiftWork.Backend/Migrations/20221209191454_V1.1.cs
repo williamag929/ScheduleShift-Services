@@ -4,7 +4,7 @@
 
 namespace ShiftWork.Backend.Migrations
 {
-    public partial class versio2 : Migration
+    public partial class V11 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

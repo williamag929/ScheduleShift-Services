@@ -29,22 +29,22 @@ namespace ShiftWork.Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Person>>> GetPerson()
         {
-          if (_context.Person == null)
+          if (_context.People == null)
           {
               return NotFound();
           }
-            return await _context.Person.ToListAsync();
+            return await _context.People.ToListAsync();
         }
 
         // GET: api/People/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Person>> GetPerson(int id)
         {
-          if (_context.Person == null)
+          if (_context.People == null)
           {
               return NotFound();
           }
-            var person = await _context.Person.FindAsync(id);
+            var person = await _context.People.FindAsync(id);
 
             if (person == null)
             {
@@ -92,14 +92,14 @@ namespace ShiftWork.Backend.Controllers
         [HttpPost]
         public async Task<ActionResult<Person>> PostPerson(PersonDto personDto)
         {
-          if (_context.Person == null)
+          if (_context.People == null)
           {
               return Problem("Entity set 'ShiftWorkContext.Person'  is null.");
           }
 
             var person = _mapper.Map<Person>(personDto);
             person.CreatedDate = DateTime.Now;
-            _context.Person.Add(person);
+            _context.People.Add(person);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetPerson", new { id = person.PersonId }, person);
@@ -109,17 +109,17 @@ namespace ShiftWork.Backend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePerson(int id)
         {
-            if (_context.Person == null)
+            if (_context.People == null)
             {
                 return NotFound();
             }
-            var person = await _context.Person.FindAsync(id);
+            var person = await _context.People.FindAsync(id);
             if (person == null)
             {
                 return NotFound();
             }
 
-            _context.Person.Remove(person);
+            _context.People.Remove(person);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -127,7 +127,7 @@ namespace ShiftWork.Backend.Controllers
 
         private bool PersonExists(int id)
         {
-            return (_context.Person?.Any(e => e.PersonId == id)).GetValueOrDefault();
+            return (_context.People?.Any(e => e.PersonId == id)).GetValueOrDefault();
         }
         [HttpPost]
         [Route("login")]
@@ -135,7 +135,7 @@ namespace ShiftWork.Backend.Controllers
         {
             try
             {
-                var personValidated = await _context.Person.Where(x => x.Email == loginDto.Email && x.DocumentNumber == loginDto.DocumentNumber).FirstAsync();
+                var personValidated = await _context.People.Where(x => x.Email == loginDto.Email && x.DocumentNumber == loginDto.DocumentNumber).FirstAsync();
                 return Ok();
               
 

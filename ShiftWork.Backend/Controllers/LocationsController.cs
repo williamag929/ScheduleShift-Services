@@ -29,22 +29,29 @@ namespace ShiftWork.Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Location>>> GetLocation()
         {
-          if (_context.Location == null)
+          if (_context.Locations == null)
           {
               return NotFound();
           }
-            return await _context.Location.ToListAsync();
+            return await _context.Locations.ToListAsync();
+
+        //todo: https://timezonedb.com/api
+        //Username: waguirre
+        //API Key: XXUXYVJ3TB67.
+        //http://api.timezonedb.com/v2.1/get-time-zone?key=XXUXYVJ3TB67&format=json&by=position&lat=40.689247&lng=-74.044502&username=waguirre
+        //http://api.timezonedb.com/v2.1/get-time-zone?key=XXUXYVJ3TB67&format=json&by=zone&zone=America/New_York
         }
+
 
         // GET: api/Locations/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Location>> GetLocation(int id)
         {
-          if (_context.Location == null)
+          if (_context.Locations == null)
           {
               return NotFound();
           }
-            var location = await _context.Location.FindAsync(id);
+            var location = await _context.Locations.FindAsync(id);
 
             if (location == null)
             {
@@ -95,14 +102,14 @@ namespace ShiftWork.Backend.Controllers
         {
             var location = _mapper.Map<Location>(locationDto);
 
-            if (_context.Location == null)
+            if (_context.Locations == null)
           {
               return Problem("Entity set 'ShiftWorkContext.Location'  is null.");
           }
             _context.Entry(location).State = EntityState.Modified;
 
             location.CreatedDate = DateTime.Now;
-            _context.Location.Add(location);
+            _context.Locations.Add(location);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetLocation", new { id = location.LocationId }, location);
@@ -112,17 +119,17 @@ namespace ShiftWork.Backend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLocation(int id)
         {
-            if (_context.Location == null)
+            if (_context.Locations == null)
             {
                 return NotFound();
             }
-            var location = await _context.Location.FindAsync(id);
+            var location = await _context.Locations.FindAsync(id);
             if (location == null)
             {
                 return NotFound();
             }
 
-            _context.Location.Remove(location);
+            _context.Locations.Remove(location);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -130,7 +137,7 @@ namespace ShiftWork.Backend.Controllers
 
         private bool LocationExists(int id)
         {
-            return (_context.Location?.Any(e => e.LocationId == id)).GetValueOrDefault();
+            return (_context.Locations?.Any(e => e.LocationId == id)).GetValueOrDefault();
         }
     }
 }
