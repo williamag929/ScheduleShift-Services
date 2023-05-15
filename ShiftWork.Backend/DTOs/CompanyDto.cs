@@ -3,10 +3,10 @@ namespace ShiftWork.Backend.DTOs
 {
     public class CompanyDto
     {
-        public string CompanyId { get; set; }
-        public string CompanyName { get; set; }
-        public string Address { get; set; }
-        public string ExternalCode { get; set; }
+        public string CompanyId { get; set; } = string.Empty;
+        public string CompanyName { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
+        public string ExternalCode { get; set; } = string.Empty;
         public int Status { get; set; }
     }
 }

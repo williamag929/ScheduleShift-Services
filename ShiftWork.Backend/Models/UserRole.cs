@@ -6,7 +6,7 @@ namespace ShiftWork.Backend.Models
     {
         public int UserRoleId { get; set; }
         public int UserProfileId { get; set; }
-        public string CompanyId { get; set; }
+        public string CompanyId { get; set; }  = string.Empty;
         public int RoleId { get; set; }
         public int PersonId { get; set; }
     }

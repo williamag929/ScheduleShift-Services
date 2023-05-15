@@ -3,12 +3,12 @@
     public class Location
     {
         public int LocationId { get; set; }
-        public string LocationName { get; set; }
+        public string LocationName { get; set; } = string.Empty;
         public DateTime CreatedDate { get; set; }
-        public List<Schedule> Schedules { get; set; }
+        public List<Schedule> Schedules { get; set; } = new List<Schedule>();
         public int? TimeZoneId { get; set; }
-        public string GeoLocation { get; set; }
-        public string CompanyId { get; set; }
+        public string GeoLocation { get; set; } = string.Empty;
+        public string CompanyId { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime Created { get; set; } = DateTime.UtcNow;

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShiftWork.Backend.Data;
@@ -45,12 +40,10 @@ namespace ShiftWork.Backend.Controllers
               return NotFound();
           }
             var area = await _context.Areas.FindAsync(id);
-
             if (area == null)
             {
                 return NotFound();
             }
-
             return area;
         }
 
@@ -60,14 +53,12 @@ namespace ShiftWork.Backend.Controllers
         public async Task<IActionResult> PutArea(int id, AreaDto areaDto)
         {
             var area = _mapper.Map<Area>(areaDto);
-
+            area.Updated = DateTime.UtcNow;
             if (id != area.AreaId)
             {
                 return BadRequest();
             }
-
             _context.Entry(area).State = EntityState.Modified;
-
             try
             {
                 await _context.SaveChangesAsync();
@@ -83,7 +74,6 @@ namespace ShiftWork.Backend.Controllers
                     throw;
                 }
             }
-
             return NoContent();
         }
 
@@ -96,14 +86,12 @@ namespace ShiftWork.Backend.Controllers
             {
                 return Problem("Entity set 'ShiftWorkContext.Area'  is null.");
             }
-
             var area = _mapper.Map<Area>(areaDto);
-
             area.Created = DateTime.UtcNow;
-
+            area.Updated = DateTime.UtcNow;
+            area.IsActive = true;
             _context.Areas.Add(area);
             await _context.SaveChangesAsync();
-
             return CreatedAtAction("GetArea", new { id = area.AreaId }, area);
         }
 
@@ -120,10 +108,8 @@ namespace ShiftWork.Backend.Controllers
             {
                 return NotFound();
             }
-
             _context.Areas.Remove(area);
             await _context.SaveChangesAsync();
-
             return NoContent();
         }
 
