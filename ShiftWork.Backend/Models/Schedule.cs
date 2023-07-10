@@ -15,6 +15,7 @@
 		public string CompanyId { get; set; } = string.Empty;
 		public bool IsActive { get; set; }
 		public bool IsDeleted { get; set; }
+		public bool IsApproved { get; set; }
 		public DateTime Created { get; set; } = DateTime.UtcNow;
 		public DateTime Updated { get; set; }
 		public DateTime Deleted { get; set; }

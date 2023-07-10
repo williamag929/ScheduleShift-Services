@@ -11,10 +11,10 @@ namespace ShiftWork.Backend.Models
         public string Address { get; set; } = string.Empty;
         public string ExternalCode { get; set; } = string.Empty;
         public string Config { get; set; } = string.Empty;
-        public bool IsActive { get; set; }
-        public bool IsDeleted { get; set; }
+        public bool IsActive { get; set; } = true;
+        public bool IsDeleted { get; set; } = false;
         public DateTime Created { get; set; } = DateTime.UtcNow;
-        public DateTime Updated { get; set; }
+        public DateTime Updated { get; set; } = DateTime.UtcNow;
         public DateTime Deleted { get; set; }
     }
 }

@@ -11,14 +11,8 @@
         public int? ScheduleId { get; set; }
         public int? AreaId { get; set; }
         public int? LocationId { get; set; }
-        public bool IsActive { get; set; }
-        public bool IsDeleted { get; set; }
-        public bool IsApproved { get; set; }
         public string? GeoLocationStart { get; set; }
         public string? GeoLocationEnd { get; set; }
-        public DateTime Created { get; set; }
-        public DateTime Updated { get; set; }
-        public DateTime Deleted { get; set; }
         public string CompanyId { get; set; } = string.Empty;
     }
 }

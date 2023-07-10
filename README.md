@@ -37,6 +37,8 @@
  docker build -t shiftworkbackend .
  docker run -d -p 8080:80 --name shiftworkbackend shiftworkbackend:latest
 
+ https://localhost:7054/Swagger/index.html
+
 #frontend run
 
 npm install
@@ -46,5 +48,7 @@ npm start
 docker build -t shiftworkfrontend .
 
 docker run -d -it -p 80:80/tcp --name shift-workfrontend shiftworkfrontend:latest
+
+
 
 ```
