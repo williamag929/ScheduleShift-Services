@@ -52,3 +52,17 @@ docker run -d -it -p 80:80/tcp --name shift-workfrontend shiftworkfrontend:lates
 
 
 ```
+
+
+# database update #
+
+Package Manager Console
+
+PM>   Add-Migration AddTAskTimeStart
+
+PM>   Database-Update
+
+Console
+
+dotnet ef database update
+
