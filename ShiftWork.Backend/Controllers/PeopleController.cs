@@ -27,7 +27,7 @@ namespace ShiftWork.Backend.Controllers
 
         // GET: api/People
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Person>>> GetPerson()
+        public async Task<ActionResult<IEnumerable<Person>>> GetPerson([FromQuery] string companyId)
         {
           if (_context.People == null)
           {

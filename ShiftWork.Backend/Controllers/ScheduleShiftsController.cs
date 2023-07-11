@@ -26,7 +26,7 @@ namespace ShiftWork.Backend.Controllers
 
         // GET: api/ScheduleShifts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ScheduleShift>>> GetScheduleShift()
+        public async Task<ActionResult<IEnumerable<ScheduleShift>>> GetScheduleShift([FromQuery] string companyId)
         {
           if (_context.ScheduleShifts == null)
           {

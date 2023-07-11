@@ -26,7 +26,7 @@ namespace ShiftWork.Backend.Controllers
 
         // GET: api/Roles
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Role>>> GetRole()
+        public async Task<ActionResult<IEnumerable<Role>>> GetRole([FromQuery] string companyId)
         {
           if (_context.Roles == null)
           {

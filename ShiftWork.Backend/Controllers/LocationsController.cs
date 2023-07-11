@@ -27,7 +27,7 @@ namespace ShiftWork.Backend.Controllers
 
         // GET: api/Locations
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Location>>> GetLocation()
+        public async Task<ActionResult<IEnumerable<Location>>> GetLocation([FromQuery] string companyId)
         {
           if (_context.Locations == null)
           {
