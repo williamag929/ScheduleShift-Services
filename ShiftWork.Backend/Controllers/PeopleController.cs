@@ -33,7 +33,7 @@ namespace ShiftWork.Backend.Controllers
           {
               return NotFound();
           }
-            return await _context.People.ToListAsync();
+            return await _context.People.Where(c=>c.CompanyId == companyId).ToListAsync();
         }
 
         // GET: api/People/5

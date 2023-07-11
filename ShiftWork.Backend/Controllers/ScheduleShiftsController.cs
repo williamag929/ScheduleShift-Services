@@ -32,7 +32,7 @@ namespace ShiftWork.Backend.Controllers
           {
               return NotFound();
           }
-            return await _context.ScheduleShifts.ToListAsync();
+            return await _context.ScheduleShifts.Where(c=>c.CompanyId == companyId).ToListAsync();
         }
 
         // GET: api/ScheduleShifts/5

@@ -27,13 +27,13 @@ namespace ShiftWork.Backend.Controllers
 
         // GET: api/TaskShifts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TaskShift>>> GetTaskShift()
+        public async Task<ActionResult<IEnumerable<TaskShift>>> GetTaskShift([FromQuery] string companyId)
         {
           if (_context.TaskShifts == null)
           {
               return NotFound();
           }
-            return await _context.TaskShifts.ToListAsync();
+            return await _context.TaskShifts.Where(c=>c.CompanyId == companyId).ToListAsync();
         }
 
         // GET: api/TaskShifts/5

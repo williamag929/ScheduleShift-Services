@@ -33,7 +33,7 @@ namespace ShiftWork.Backend.Controllers
           {
               return NotFound();
           }
-            return await _context.Locations.ToListAsync();
+            return await _context.Locations.Where(c=>c.CompanyId == companyId).ToListAsync();
 
         //todo: https://timezonedb.com/api
         //Username: waguirre

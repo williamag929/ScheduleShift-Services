@@ -22,13 +22,13 @@ namespace ShiftWork.Backend.Controllers
 
         // GET: api/Areas
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Area>>> GetArea()
+        public async Task<ActionResult<IEnumerable<Area>>> GetArea([FromQuery] string companyId)
         {
           if (_context.Areas == null)
           {
               return NotFound();
           }
-            return await _context.Areas.ToListAsync();
+            return await _context.Areas.Where(c=>c.CompanyId == companyId).ToListAsync();
         }
 
         // GET: api/Areas/5
