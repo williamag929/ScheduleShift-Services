@@ -27,7 +27,7 @@ namespace ShiftWork.Backend.Controllers
 
         // GET: api/Schedules
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Schedule>>> GetSchedule([FromQuery] string companyId)
+        public async Task<ActionResult<IEnumerable<Schedule>>> GetSchedules([FromQuery] string companyId)
         {
           if (_context.Schedules == null)
           {
@@ -38,7 +38,7 @@ namespace ShiftWork.Backend.Controllers
 
         // GET: api/Schedules/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Schedule>> GetSchedule(string id)
+        public async Task<ActionResult<Schedule>> GetSchedule([FromBody] string id)
         {
           if (_context.Schedules == null)
           {

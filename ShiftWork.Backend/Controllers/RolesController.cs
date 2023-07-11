@@ -26,7 +26,7 @@ namespace ShiftWork.Backend.Controllers
 
         // GET: api/Roles
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Role>>> GetRole([FromQuery] string companyId)
+        public async Task<ActionResult<IEnumerable<Role>>> GetRoles([FromQuery] string companyId)
         {
           if (_context.Roles == null)
           {
@@ -37,7 +37,7 @@ namespace ShiftWork.Backend.Controllers
 
         // GET: api/Roles/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Role>> GetRole(string id)
+        public async Task<ActionResult<Role>> GetRole([FromBody] string id)
         {
           if (_context.Roles == null)
           {
