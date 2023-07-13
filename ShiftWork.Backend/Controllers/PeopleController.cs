@@ -135,7 +135,8 @@ namespace ShiftWork.Backend.Controllers
         {
             try
             {
-                var personValidated = await _context.People.Where(x => x.Email == loginDto.Email && x.DocumentNumber == loginDto.DocumentNumber).FirstAsync();
+                var personValidated = await _context.People.Where(x => x.Email == loginDto.Email
+                 && x.PrivateKey == loginDto.Password).FirstAsync();
                 return Ok(personValidated.PersonId);
               
 
