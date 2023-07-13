@@ -20,6 +20,7 @@
         public DateTime Updated { get; set; } = DateTime.UtcNow;
         public DateTime Deleted { get; set; } = DateTime.UtcNow;
         public string PersonConfig {get;set; } = string.Empty;
+        public string PrivateKey {get;set;} = string.Empty;
 
     }
 }
