@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace ShiftWork.Backend.Models
 {
     public class Notification

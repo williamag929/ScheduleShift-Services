@@ -60,7 +60,7 @@ Package Manager Console
 
 PM>   Add-Migration AddTAskTimeStart
 
-PM>   Database-Update
+PM> Update-Database
 
 Console
 
