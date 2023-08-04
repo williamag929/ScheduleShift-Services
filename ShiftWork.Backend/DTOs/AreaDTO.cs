@@ -6,6 +6,7 @@
         public string AreaName { get; set; } = string.Empty;
         public string CompanyId { get; set; } = string.Empty;
         public int LocationId { get; set; }
+        public bool IsActive {get; set;} = true;
     }
 }
 

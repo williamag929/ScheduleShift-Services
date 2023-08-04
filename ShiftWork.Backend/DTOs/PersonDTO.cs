@@ -12,5 +12,10 @@
         public string Email { get; set; } = string.Empty;
         public int PhoneNumber { get; set; }
         public string CompanyId { get; set; } = string.Empty;
+        public string MainAddreess {get;set;} = string.Empty;
+        public bool IsActive { get; set; } = true;
+        public string PersonConfig {get;set; } = string.Empty;
+//        public string PrivateKey {get;set;} = string.Empty;
+        public string AvatarImage {get;set;} = string.Empty;
     }
 }

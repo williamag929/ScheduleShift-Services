@@ -12,7 +12,7 @@
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public string Email { get; set; }    = string.Empty;
         public int PhoneNumber { get; set; } = 0;
-        public string MainAddreess {get;set;} = string.Empty;
+        public string MainAddress {get;set;} = string.Empty;
         public string CompanyId { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
         public bool IsDeleted { get; set; } = false;
