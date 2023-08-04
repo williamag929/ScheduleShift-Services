@@ -10,7 +10,7 @@
         public string GeoLocation { get; set; } = string.Empty;
         public string Latitude  { get; set; } = string.Empty;
         public string Longitude  { get; set; } = string.Empty;
-        public string Ration {get;set;} = string.Empty;}
+        public string Ration {get;set;} = string.Empty;
         public string LocationAddress {get;set;} = string.Empty;
         public string CityCode {get;set;} = string.Empty;
         public string StateCode {get;set;} = string.Empty;
