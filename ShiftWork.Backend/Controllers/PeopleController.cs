@@ -6,12 +6,14 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using ShiftWork.Backend.Data;
 using ShiftWork.Backend.DTOs;
 using ShiftWork.Backend.Models;
 
 namespace ShiftWork.Backend.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class PeopleController : ControllerBase

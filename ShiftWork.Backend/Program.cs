@@ -35,9 +35,10 @@ builder.Services.AddAuthentication(options =>
 {
     o.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidIssuer =  $"{builder.Configuration["Jwt:authDomain"]}/{ builder.Configuration["Jwt:appId"]}",
+        ValidIssuer =  $"{builder.Configuration["Jwt:authDomain"]}",
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:apiKey"])),
         //IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:apiKey"])),
-        ValidAudience = builder.Configuration["Jwt:appId"],
+        ValidAudience = builder.Configuration["Jwt:projectId"],
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,

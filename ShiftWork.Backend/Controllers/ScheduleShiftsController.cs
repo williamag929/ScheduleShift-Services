@@ -5,12 +5,14 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using ShiftWork.Backend.Data;
 using ShiftWork.Backend.Models;
 
 namespace ShiftWork.Backend.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ScheduleShiftsController : ControllerBase
