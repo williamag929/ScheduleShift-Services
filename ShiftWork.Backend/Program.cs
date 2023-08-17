@@ -33,9 +33,10 @@ builder.Services.AddAuthentication(options =>
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(o =>
 {
+    o.Authority = "https://securetoken.google.com/shift-maps-location";
     o.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidIssuer =  $"{builder.Configuration["Jwt:authDomain"]}",
+        ValidIssuer = $"{builder.Configuration["Jwt:authDomain"]}",
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:apiKey"])),
         //IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:apiKey"])),
         ValidAudience = builder.Configuration["Jwt:projectId"],
@@ -43,6 +44,7 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         //ValidateIssuerSigningKey = true
+         //"https://securetoken.google.com/shift-maps-location",
     };
 });
 
