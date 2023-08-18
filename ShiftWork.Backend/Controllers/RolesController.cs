@@ -11,6 +11,7 @@ using ShiftWork.Backend.Models;
 
 namespace ShiftWork.Backend.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class RolesController : ControllerBase

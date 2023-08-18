@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ShiftWork.Backend.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
