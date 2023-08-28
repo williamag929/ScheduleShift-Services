@@ -7,8 +7,8 @@
         public string Comment { get; set; } = string.Empty;
         public bool isSchedule {get;set;} = true;
         public DateTime TaskDate { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
+        public string StartTime { get; set; } = string.Empty;
+        public string EndTime { get; set; } = string.Empty;
         public string CompanyId { get; set; } = string.Empty;
         public int LocationId { get; set; } = 0;
         public int AreaId { get; set; } = 0;
