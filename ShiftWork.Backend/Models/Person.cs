@@ -11,6 +11,7 @@
         public bool isSchedule { get; set; } = true;
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public string Email { get; set; }    = string.Empty;
+        public string PrimaryPhone {get;set;}  = string.Empty;
         public int PhoneNumber { get; set; } = 0;
         public string MainAddress {get;set;} = string.Empty;
         public string CompanyId { get; set; } = string.Empty;

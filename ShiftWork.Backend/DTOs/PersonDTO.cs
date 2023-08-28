@@ -6,7 +6,9 @@
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string DocumentNumber { get; set; } = string.Empty;
+        
         public string Email { get; set; } = string.Empty;
+        public string PrimaryPhone {get;set;}
         public int PhoneNumber { get; set; }
         public string CompanyId { get; set; } = string.Empty;
         public string MainAddress { get; set; } = string.Empty;
