@@ -13,11 +13,11 @@
         public int LocationId { get; set; } = 0;
         public int AreaId { get; set; } = 0;
         public int PersonId {get;set;} = 0;
-        public bool IsActive { get; set; }
-        public bool IsDeleted { get; set; }
+        public bool IsActive { get; set; } = true;
+        public bool IsDeleted { get; set; } = false;
         public int CreatedBy {get;set;} = 0;
         public DateTime Created { get; set; } = DateTime.UtcNow;
         public DateTime Updated { get; set; } = DateTime.UtcNow;
-        public DateTime Deleted { get; set; }
+        public DateTime Deleted { get; set; }= DateTime.UtcNow;
     }
 }
