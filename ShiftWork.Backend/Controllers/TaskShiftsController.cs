@@ -103,6 +103,8 @@ namespace ShiftWork.Backend.Controllers
             var taskShift = _mapper.Map<TaskShift>(taskShiftDto);
 
             taskShift.Created = DateTime.Now;
+            taskShift.Updated = DateTime.Now;
+            taskShift.Deleted = DateTime.Now;
             _context.TaskShifts.Add(taskShift);
             await _context.SaveChangesAsync();
 
