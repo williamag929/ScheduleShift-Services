@@ -5,12 +5,14 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using ShiftWork.Backend.Data;
 using ShiftWork.Backend.Models;
 
 namespace ShiftWork.Backend.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ScheduleShiftsController : ControllerBase
@@ -26,13 +28,13 @@ namespace ShiftWork.Backend.Controllers
 
         // GET: api/ScheduleShifts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ScheduleShift>>> GetScheduleShift()
+        public async Task<ActionResult<IEnumerable<ScheduleShift>>> GetScheduleShift([FromQuery] string companyId)
         {
           if (_context.ScheduleShifts == null)
           {
               return NotFound();
           }
-            return await _context.ScheduleShifts.ToListAsync();
+            return await _context.ScheduleShifts.Where(c=>c.CompanyId == companyId).ToListAsync();
         }
 
         // GET: api/ScheduleShifts/5

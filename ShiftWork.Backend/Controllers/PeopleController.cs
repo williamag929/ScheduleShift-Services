@@ -6,12 +6,14 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using ShiftWork.Backend.Data;
 using ShiftWork.Backend.DTOs;
 using ShiftWork.Backend.Models;
 
 namespace ShiftWork.Backend.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class PeopleController : ControllerBase
@@ -27,13 +29,13 @@ namespace ShiftWork.Backend.Controllers
 
         // GET: api/People
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Person>>> GetPerson()
+        public async Task<ActionResult<IEnumerable<Person>>> GetPerson([FromQuery] string companyId)
         {
           if (_context.People == null)
           {
               return NotFound();
           }
-            return await _context.People.ToListAsync();
+            return await _context.People.Where(c=>c.CompanyId == companyId).ToListAsync();
         }
 
         // GET: api/People/5
@@ -135,8 +137,9 @@ namespace ShiftWork.Backend.Controllers
         {
             try
             {
-                var personValidated = await _context.People.Where(x => x.Email == loginDto.Email && x.DocumentNumber == loginDto.DocumentNumber).FirstAsync();
-                return Ok();
+                var personValidated = await _context.People.Where(x => x.Email == loginDto.Email
+                 && x.PrivateKey == loginDto.Password).FirstAsync();
+                return Ok(personValidated.PersonId);
               
 
             }catch(Exception ex)

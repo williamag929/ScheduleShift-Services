@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using ShiftWork.Backend.Data;
 using ShiftWork.Backend.DTOs;
@@ -12,6 +13,7 @@ using ShiftWork.Backend.Models;
 
 namespace ShiftWork.Backend.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TaskShiftsController : ControllerBase
@@ -27,13 +29,13 @@ namespace ShiftWork.Backend.Controllers
 
         // GET: api/TaskShifts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TaskShift>>> GetTaskShift()
+        public async Task<ActionResult<IEnumerable<TaskShift>>> GetTaskShift([FromQuery] string companyId)
         {
           if (_context.TaskShifts == null)
           {
               return NotFound();
           }
-            return await _context.TaskShifts.ToListAsync();
+            return await _context.TaskShifts.Where(c=>c.CompanyId == companyId).ToListAsync();
         }
 
         // GET: api/TaskShifts/5
@@ -100,7 +102,9 @@ namespace ShiftWork.Backend.Controllers
 
             var taskShift = _mapper.Map<TaskShift>(taskShiftDto);
 
-            taskShift.CreatedDate = DateTime.Now;
+            taskShift.Created = DateTime.Now;
+            taskShift.Updated = DateTime.Now;
+            taskShift.Deleted = DateTime.Now;
             _context.TaskShifts.Add(taskShift);
             await _context.SaveChangesAsync();
 

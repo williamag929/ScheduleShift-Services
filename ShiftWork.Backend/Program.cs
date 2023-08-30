@@ -1,11 +1,15 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.CodeAnalysis;
 //using AutoMapper.Extensions.Microsoft.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.IdentityModel.Tokens;
 using ShiftWork.Backend.Data;
 using ShiftWork.Backend.DTOs;
 using ShiftWork.Backend.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ShiftWorkContext>(options =>
@@ -21,6 +25,28 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddAutoMapper(typeof(Program));
 //builder.Services.Add(AppDomain.CurrentDomain.GetAssemblies());
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(o =>
+{
+    o.Authority = "https://securetoken.google.com/shift-maps-location";
+    o.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidIssuer = $"{builder.Configuration["Jwt:authDomain"]}",
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:apiKey"])),
+        //IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:apiKey"])),
+        ValidAudience = builder.Configuration["Jwt:projectId"],
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        //ValidateIssuerSigningKey = true
+         //"https://securetoken.google.com/shift-maps-location",
+    };
+});
 
 var apiCorsPolicy = "ApiCorsPolicy";
 
@@ -38,6 +64,7 @@ builder.Services.AddCors(options =>
                             .AllowCredentials();
                           //.WithMethods("OPTIONS", "GET");
                       });
+
 });
 
 
@@ -60,6 +87,7 @@ else
 
 app.UseHttpsRedirection();
 app.UseCors("ApiCorsPolicy");
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();

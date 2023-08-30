@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShiftWork.Backend.Data;
@@ -7,6 +8,7 @@ using ShiftWork.Backend.Models;
 
 namespace ShiftWork.Backend.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AreasController : ControllerBase
@@ -22,13 +24,13 @@ namespace ShiftWork.Backend.Controllers
 
         // GET: api/Areas
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Area>>> GetArea()
+        public async Task<ActionResult<IEnumerable<Area>>> GetArea([FromQuery] string companyId)
         {
           if (_context.Areas == null)
           {
               return NotFound();
           }
-            return await _context.Areas.ToListAsync();
+            return await _context.Areas.Where(c=>c.CompanyId == companyId).ToListAsync();
         }
 
         // GET: api/Areas/5

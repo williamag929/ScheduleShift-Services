@@ -6,12 +6,14 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using ShiftWork.Backend.Data;
 using ShiftWork.Backend.DTOs;
 using ShiftWork.Backend.Models;
 
 namespace ShiftWork.Backend.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class LocationsController : ControllerBase
@@ -27,13 +29,13 @@ namespace ShiftWork.Backend.Controllers
 
         // GET: api/Locations
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Location>>> GetLocation()
+        public async Task<ActionResult<IEnumerable<Location>>> GetLocation([FromQuery] string companyId)
         {
           if (_context.Locations == null)
           {
               return NotFound();
           }
-            return await _context.Locations.ToListAsync();
+            return await _context.Locations.Where(c=>c.CompanyId == companyId).ToListAsync();
 
         //todo: https://timezonedb.com/api
         //Username: waguirre

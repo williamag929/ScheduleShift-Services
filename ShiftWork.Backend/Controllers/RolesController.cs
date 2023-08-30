@@ -5,12 +5,14 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using ShiftWork.Backend.Data;
 using ShiftWork.Backend.Models;
 
 namespace ShiftWork.Backend.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class RolesController : ControllerBase
@@ -26,18 +28,18 @@ namespace ShiftWork.Backend.Controllers
 
         // GET: api/Roles
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Role>>> GetRole()
+        public async Task<ActionResult<IEnumerable<Role>>> GetRoles([FromQuery] string companyId)
         {
           if (_context.Roles == null)
           {
               return NotFound();
           }
-            return await _context.Roles.ToListAsync();
+            return await _context.Roles.Where(c=>c.CompanyId == companyId).ToListAsync();
         }
 
         // GET: api/Roles/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Role>> GetRole(string id)
+        public async Task<ActionResult<Role>> GetRole([FromBody] string id)
         {
           if (_context.Roles == null)
           {

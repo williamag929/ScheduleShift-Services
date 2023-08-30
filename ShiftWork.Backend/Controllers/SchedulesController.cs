@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using ShiftWork.Backend.Data;
 using ShiftWork.Backend.DTOs;
@@ -12,6 +13,7 @@ using ShiftWork.Backend.Models;
 
 namespace ShiftWork.Backend.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class SchedulesController : ControllerBase
@@ -27,18 +29,18 @@ namespace ShiftWork.Backend.Controllers
 
         // GET: api/Schedules
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Schedule>>> GetSchedule()
+        public async Task<ActionResult<IEnumerable<Schedule>>> GetSchedules([FromQuery] string companyId)
         {
           if (_context.Schedules == null)
           {
               return NotFound();
           }
-            return await _context.Schedules.ToListAsync();
+            return await _context.Schedules.Where(c=>c.CompanyId == companyId).ToListAsync();
         }
 
         // GET: api/Schedules/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Schedule>> GetSchedule(string id)
+        public async Task<ActionResult<Schedule>> GetSchedule([FromBody] string id)
         {
           if (_context.Schedules == null)
           {
