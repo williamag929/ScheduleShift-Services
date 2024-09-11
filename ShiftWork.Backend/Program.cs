@@ -9,7 +9,10 @@ using Microsoft.IdentityModel.Tokens;
 using ShiftWork.Backend.Data;
 using ShiftWork.Backend.DTOs;
 using ShiftWork.Backend.Models;
+using ShiftWork.Backend.Services;
 using System.Text;
+using Microsoft.Extensions.Caching.Memory; // Add this import
+
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ShiftWorkContext>(options =>
@@ -25,6 +28,13 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddAutoMapper(typeof(Program));
 //builder.Services.Add(AppDomain.CurrentDomain.GetAssemblies());
+
+// Register ScheduleShiftService with the DI container
+builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<IAreaService, AreaServices>();
+builder.Services.AddScoped<IScheduleShiftService, ScheduleShiftService>();
+builder.Services.AddScoped<ITaskShiftService, TaskShiftService>();
+
 
 builder.Services.AddAuthentication(options =>
 {
@@ -67,6 +77,8 @@ builder.Services.AddCors(options =>
 
 });
 
+// Register the memory cache service
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 

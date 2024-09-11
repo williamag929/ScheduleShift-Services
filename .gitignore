@@ -361,4 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+*appsettings.json
+
 ShiftWork.Backend/appsettings.json
+./appsettings.json
