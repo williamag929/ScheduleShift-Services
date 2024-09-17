@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace ShiftWork.Backend.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("api/{companyId}/[controller]")]
     [ApiController]
     public class AreasController : ControllerBase
     {
@@ -28,7 +28,7 @@ namespace ShiftWork.Backend.Controllers
         }
 
         // GET: api/{companyId}/Areas
-        [HttpGet("{companyId}/Areas")]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<Area>>> GetAreas(string companyId)
         {
             var cacheKey = $"Areas_{companyId}";
@@ -50,7 +50,7 @@ namespace ShiftWork.Backend.Controllers
         }
 
         // GET: api/{companyId}/Areas/{areaId}
-        [HttpGet("{companyId}/Areas/{areaId}")]
+        [HttpGet("{areaId}")]
         public async Task<ActionResult<Area>> GetArea(string companyId, int areaId)
         {
             var cacheKey = $"Area_{companyId}_{areaId}";
@@ -77,7 +77,7 @@ namespace ShiftWork.Backend.Controllers
         }
 
         // PUT: api/{companyId}/Areas
-        [HttpPut("{companyId}/Areas")]
+        [HttpPut]
         public async Task<IActionResult> PutArea(string companyId, [FromBody] AreaDto areaDto)
         {
             if (areaDto.AreaId == null)
@@ -102,7 +102,7 @@ namespace ShiftWork.Backend.Controllers
         }
 
         // POST: api/{companyId}/Areas
-        [HttpPost("{companyId}/Areas")]
+        [HttpPost]
         public async Task<ActionResult<Area>> PostArea(string companyId, [FromBody] AreaDto areaDto)
         {
             var cacheKey = $"Areas_{companyId}";
@@ -124,7 +124,7 @@ namespace ShiftWork.Backend.Controllers
         }
 
         // DELETE: api/{companyId}/Areas/{areaId}
-        [HttpDelete("{companyId}/Areas/{areaId}")]
+        [HttpDelete("{areaId}")]
         public async Task<IActionResult> DeleteArea(string companyId, int areaId)
         {
             var areas = await _areaService.Get(companyId, new[] { areaId });

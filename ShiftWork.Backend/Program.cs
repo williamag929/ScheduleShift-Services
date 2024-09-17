@@ -11,7 +11,8 @@ using ShiftWork.Backend.DTOs;
 using ShiftWork.Backend.Models;
 using ShiftWork.Backend.Services;
 using System.Text;
-using Microsoft.Extensions.Caching.Memory; // Add this import
+using Microsoft.Extensions.Caching.Memory;
+using Amazon.S3; // Add this import
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,8 @@ builder.Services.AddDbContext<ShiftWorkContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ShiftWorkContext") ?? throw new InvalidOperationException("Connection string 'ShiftWorkContext' not found.")));
 
 // Add services to the container.
+var provider = builder.Services.BuildServiceProvider();
+var configuration = provider.GetService<IConfiguration>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -79,6 +82,8 @@ builder.Services.AddCors(options =>
 
 // Register the memory cache service
 builder.Services.AddMemoryCache();
+builder.Services.AddAWSService<IAmazonS3>(configuration.GetAWSOptions());
+builder.Services.AddScoped<IAwsS3Service, AwsS3Service>();
 
 var app = builder.Build();
 
