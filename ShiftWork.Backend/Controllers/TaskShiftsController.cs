@@ -14,7 +14,7 @@ using ShiftWork.Backend.Models;
 namespace ShiftWork.Backend.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("api/{companyId}/[controller]")]
     [ApiController]
     public class TaskShiftsController : ControllerBase
     {
