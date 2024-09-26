@@ -37,6 +37,8 @@ builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<IAreaService, AreaServices>();
 builder.Services.AddScoped<IScheduleShiftService, ScheduleShiftService>();
 builder.Services.AddScoped<ITaskShiftService, TaskShiftService>();
+builder.Services.AddScoped<IPeopleService, PeopleService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 
 
 builder.Services.AddAuthentication(options =>

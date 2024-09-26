@@ -14,13 +14,13 @@ namespace ShiftWork.Backend.Controllers
     [Authorize]
     [Route("api/{companyId}/[controller]")]
     [ApiController]
-    public class LocationController : ControllerBase
+    public class LocationsController : ControllerBase
     {
         private readonly ILocationService _locationService;
         private readonly IMapper _mapper;
         private readonly IMemoryCache _memoryCache;
 
-        public LocationController(ILocationService locationService, IMapper mapper, IMemoryCache memoryCache)
+        public LocationsController(ILocationService locationService, IMapper mapper, IMemoryCache memoryCache)
         {
             _locationService = locationService;
             _mapper = mapper;
