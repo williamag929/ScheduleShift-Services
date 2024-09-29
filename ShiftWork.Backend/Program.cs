@@ -35,6 +35,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 // Register ScheduleShiftService with the DI container
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<IAreaService, AreaServices>();
+builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IScheduleShiftService, ScheduleShiftService>();
 builder.Services.AddScoped<ITaskShiftService, TaskShiftService>();
 builder.Services.AddScoped<IPeopleService, PeopleService>();
