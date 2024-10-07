@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using ShiftWork.Backend.Data;
 using ShiftWork.Backend.Models;
 
@@ -11,10 +12,12 @@ namespace ShiftWork.Backend.Services
     public class PeopleService : IPeopleService
     {
         private readonly ShiftWorkContext _context;
+        private readonly IDistributedCache _cache;
 
-        public PeopleService(ShiftWorkContext context)
+        public PeopleService(ShiftWorkContext context, IDistributedCache cache)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _cache = cache ?? throw new ArgumentNullException();
         }
 
         // Get all people
@@ -24,10 +27,21 @@ namespace ShiftWork.Backend.Services
             {
                 throw new ArgumentException("Company ID cannot be null or empty", nameof(companyId));
             }
+            var cacheKey = $"people_{companyId}";
+            var cacheOptions = new DistributedCacheEntryOptions()
+               .SetAbsoluteExpiration(TimeSpan.FromMinutes(20))
+               .SetSlidingExpiration(TimeSpan.FromMinutes(2));
 
-            return await _context.People
+            var people = await _cache.GetOrSetAsync(cacheKey,
+                async () =>
+                {
+                    return await _context.People
                 .Where(p => p.CompanyId == companyId)
                 .ToListAsync();
+                },
+                cacheOptions)!;
+
+            return people;
         }
 
         // Get a person by Id
@@ -51,6 +65,9 @@ namespace ShiftWork.Backend.Services
 
             await _context.People.AddAsync(person);
             await _context.SaveChangesAsync();
+
+            var cacheKey = $"people_{person.CompanyId}";
+            _cache.Remove(cacheKey);
 
             return person;
         }
@@ -95,6 +112,9 @@ namespace ShiftWork.Backend.Services
 
             _context.People.Remove(person);
             await _context.SaveChangesAsync();
+
+            var cacheKey = $"people_{person.CompanyId}";
+            _cache.Remove(cacheKey);            
 
             return true;
         }
