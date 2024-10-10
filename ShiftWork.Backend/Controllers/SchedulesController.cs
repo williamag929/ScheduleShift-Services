@@ -1,149 +1,137 @@
-﻿using System;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using ShiftWork.Backend.DTOs;
+using ShiftWork.Backend.Models;
+using ShiftWork.Backend.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using ShiftWork.Backend.Data;
-using ShiftWork.Backend.DTOs;
-using ShiftWork.Backend.Models;
 
 namespace ShiftWork.Backend.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("api/{companyId}/[controller]")]
     [ApiController]
-    public class SchedulesController : ControllerBase
+    public class ScheduleController : ControllerBase
     {
-        private readonly ShiftWorkContext _context;
+        private readonly IScheduleService _scheduleService;
         private readonly IMapper _mapper;
+        private readonly IMemoryCache _memoryCache;
 
-        public SchedulesController(ShiftWorkContext context, IMapper mapper)
+        public ScheduleController(IScheduleService scheduleService, IMapper mapper, IMemoryCache memoryCache)
         {
-            _context = context;
+            _scheduleService = scheduleService;
             _mapper = mapper;
+            _memoryCache = memoryCache;
         }
 
-        // GET: api/Schedules
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Schedule>>> GetSchedules([FromQuery] string companyId)
+        public async Task<ActionResult<IEnumerable<Schedule>>> GetSchedules(string companyId)
         {
-          if (_context.Schedules == null)
-          {
-              return NotFound();
-          }
-            return await _context.Schedules.Where(c=>c.CompanyId == companyId).ToListAsync();
-        }
-
-        // GET: api/Schedules/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Schedule>> GetSchedule([FromBody] string id)
-        {
-          if (_context.Schedules == null)
-          {
-              return NotFound();
-          }
-            var schedule = await _context.Schedules.FindAsync(id);
-
-            if (schedule == null)
+            var cacheKey = $"Schedules_{companyId}";
+            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<Schedule> schedules))
             {
-                return NotFound();
-            }
-
-            return schedule;
-        }
-
-        // PUT: api/Schedules/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutSchedule(int id, ScheduleDto scheduleDto)
-        {
-
-            var schedule = _mapper.Map<Schedule>(scheduleDto);
-
-            if (id != schedule.ScheduleId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(schedule).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ScheduleExists(id))
+                schedules = await _scheduleService.GetAll(companyId);
+                if (schedules == null || !schedules.Any())
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+
+                _memoryCache.Set(cacheKey, schedules, cacheEntryOptions);
             }
 
-            return NoContent();
+            return Ok(schedules);
         }
 
-        // POST: api/Schedules
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Schedule>> PostSchedule(ScheduleDto scheduleDto)
+        [HttpGet("{scheduleId}")]
+        public async Task<ActionResult<Schedule>> GetSchedule(string companyId, int scheduleId)
         {
+            var cacheKey = $"Schedule_{companyId}_{scheduleId}";
+            if (!_memoryCache.TryGetValue(cacheKey, out Schedule schedule))
+            {
+                schedule = await _scheduleService.Get(companyId, scheduleId);
+
+                if (schedule == null)
+                {
+                    return NotFound();
+                }
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+
+                _memoryCache.Set(cacheKey, schedule, cacheEntryOptions);
+            }
+
+            return Ok(schedule);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> PutSchedule(string companyId, [FromBody] ScheduleDto scheduleDto)
+        {
+            if (scheduleDto.ScheduleId == null)
+            {
+                return BadRequest("ScheduleId is required");
+            }
+
             var schedule = _mapper.Map<Schedule>(scheduleDto);
+            schedule.CompanyId = companyId;
+            schedule.Updated = DateTime.UtcNow;
 
-            if (_context.Schedules == null)
-          {
-              return Problem("Entity set 'ShiftWorkContext.Schedule'  is null.");
-          }
-            _context.Schedules.Add(schedule);
-            try
+            var updatedSchedule = await _scheduleService.Update(schedule);
+            if (updatedSchedule == null)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (ScheduleExists(schedule.ScheduleId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
 
-            return CreatedAtAction("GetSchedule", new { id = schedule.ScheduleId }, schedule);
+            var cacheKey = $"Schedule_{companyId}_{scheduleDto.ScheduleId}";
+            _memoryCache.Remove(cacheKey);
+
+            return Ok(updatedSchedule);
         }
 
-        // DELETE: api/Schedules/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteSchedule(string id)
+        [HttpPost]
+        public async Task<ActionResult<Schedule>> PostSchedule(string companyId, [FromBody] ScheduleDto scheduleDto)
         {
-            if (_context.Schedules == null)
+            var cacheKey = $"Schedules_{companyId}";
+
+            var schedule = _mapper.Map<Schedule>(scheduleDto);
+            schedule.CompanyId = companyId;
+            schedule.Created = DateTime.UtcNow;
+            schedule.Updated = DateTime.UtcNow;
+            schedule.IsActive = true;
+
+            var createdSchedule = await _scheduleService.Add(schedule);
+            if (createdSchedule == null)
             {
-                return NotFound();
+                return BadRequest("Failed to create schedule");
             }
-            var schedule = await _context.Schedules.FindAsync(id);
-            if (schedule == null)
+            _memoryCache.Remove(cacheKey);
+
+            return CreatedAtAction(nameof(GetSchedule), new { companyId, scheduleId = createdSchedule.ScheduleId }, createdSchedule);
+        }
+
+        [HttpDelete("{scheduleId}")]
+        public async Task<IActionResult> DeleteSchedule(string companyId, int scheduleId)
+        {
+            var schedule = await _scheduleService.Get(companyId, scheduleId);
+
+            var isDeleted = await _scheduleService.Delete(schedule.ScheduleId);
+            if (!isDeleted)
             {
-                return NotFound();
+                return BadRequest("Failed to delete schedule");
             }
 
-            _context.Schedules.Remove(schedule);
-            await _context.SaveChangesAsync();
+            var cacheKey = $"Schedule_{companyId}_{scheduleId}";
+            _memoryCache.Remove(cacheKey);
 
             return NoContent();
         }
 
-        private bool ScheduleExists(int id)
-        {
-            return (_context.Schedules?.Any(e => e.ScheduleId == id)).GetValueOrDefault();
-        }
     }
 }

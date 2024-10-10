@@ -1,145 +1,142 @@
-﻿using System;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using ShiftWork.Backend.DTOs;
+using ShiftWork.Backend.Models;
+using ShiftWork.Backend.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
-using ShiftWork.Backend.Data;
-using ShiftWork.Backend.DTOs;
-using ShiftWork.Backend.Models;
 
 namespace ShiftWork.Backend.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("api/{companyId}/[controller]")]
     [ApiController]
     public class LocationsController : ControllerBase
     {
-        private readonly ShiftWorkContext _context;
+        private readonly ILocationService _locationService;
         private readonly IMapper _mapper;
+        private readonly IMemoryCache _memoryCache;
 
-        public LocationsController(ShiftWorkContext context, IMapper mapper)
+        public LocationsController(ILocationService locationService, IMapper mapper, IMemoryCache memoryCache)
         {
-            _context = context;
+            _locationService = locationService;
             _mapper = mapper;
+            _memoryCache = memoryCache;
         }
 
-        // GET: api/Locations
+        // GET: api/{companyId}/Location
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Location>>> GetLocation([FromQuery] string companyId)
+        public async Task<ActionResult<IEnumerable<Location>>> GetLocations(string companyId)
         {
-          if (_context.Locations == null)
-          {
-              return NotFound();
-          }
-            return await _context.Locations.Where(c=>c.CompanyId == companyId).ToListAsync();
-
-        //todo: https://timezonedb.com/api
-        //Username: waguirre
-        //API Key: XXUXYVJ3TB67.
-        //http://api.timezonedb.com/v2.1/get-time-zone?key=XXUXYVJ3TB67&format=json&by=position&lat=40.689247&lng=-74.044502&username=waguirre
-        //http://api.timezonedb.com/v2.1/get-time-zone?key=XXUXYVJ3TB67&format=json&by=zone&zone=America/New_York
-        }
-
-
-        // GET: api/Locations/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Location>> GetLocation(int id)
-        {
-          if (_context.Locations == null)
-          {
-              return NotFound();
-          }
-            var location = await _context.Locations.FindAsync(id);
-
-            if (location == null)
+            var cacheKey = $"Locations_{companyId}";
+            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<Location> locations))
             {
-                return NotFound();
-            }
-
-            return location;
-        }
-
-        // PUT: api/Locations/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutLocation(int id, LocationDto locationDto)
-        {
-
-            var location = _mapper.Map<Location>(locationDto);
-
-            if (id != location.LocationId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(location).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!LocationExists(id))
+                locations = await _locationService.GetAll(companyId);
+                if (locations == null || !locations.Any())
                 {
                     return NotFound();
                 }
-                else
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+
+                _memoryCache.Set(cacheKey, locations, cacheEntryOptions);
+            }
+
+            return Ok(locations);
+        }
+
+        // GET: api/{companyId}/Location/{locationId}
+        [HttpGet("{locationId}")]
+        public async Task<ActionResult<Location>> GetLocation(string companyId, int locationId)
+        {
+            var cacheKey = $"Location_{companyId}_{locationId}";
+            if (!_memoryCache.TryGetValue(cacheKey, out Location location))
+            {
+                location = await _locationService.Get(companyId, locationId );
+
+                if (location == null)
                 {
-                    throw;
+                    return NotFound();
                 }
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+
+                _memoryCache.Set(cacheKey, location, cacheEntryOptions);
             }
 
-            return NoContent();
+            return Ok(location);
         }
 
-        // POST: api/Locations
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Location>> PostLocation(LocationDto locationDto)
+        // PUT: api/{companyId}/Location
+        [HttpPut]
+        public async Task<IActionResult> PutLocation(string companyId, [FromBody] LocationDto locationDto)
         {
+            if (locationDto.LocationId == null)
+            {
+                return BadRequest("LocationId is required");
+            }
+
             var location = _mapper.Map<Location>(locationDto);
+            location.CompanyId = companyId;
+            location.Updated = DateTime.UtcNow;
 
-            if (_context.Locations == null)
-          {
-              return Problem("Entity set 'ShiftWorkContext.Location'  is null.");
-          }
-            _context.Entry(location).State = EntityState.Modified;
+            var updatedLocation = await _locationService.Update(location);
+            if (updatedLocation == null)
+            {
+                return NotFound();
+            }
 
-            location.CreatedDate = DateTime.Now;
-            _context.Locations.Add(location);
-            await _context.SaveChangesAsync();
+            var cacheKey = $"Location_{companyId}_{locationDto.LocationId}";
+            _memoryCache.Remove(cacheKey);
 
-            return CreatedAtAction("GetLocation", new { id = location.LocationId }, location);
+            return Ok(updatedLocation);
         }
 
-        // DELETE: api/Locations/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteLocation(int id)
+        // POST: api/{companyId}/Location
+        [HttpPost]
+        public async Task<ActionResult<Location>> PostLocation(string companyId, [FromBody] LocationDto locationDto)
         {
-            if (_context.Locations == null)
+            var cacheKey = $"Locations_{companyId}";
+
+            var location = _mapper.Map<Location>(locationDto);
+            location.CompanyId = companyId;
+            location.Created = DateTime.UtcNow;
+            location.Updated = DateTime.UtcNow;
+            location.IsActive = true;
+
+            var createdLocation = await _locationService.Add(location);
+            if (createdLocation == null)
             {
-                return NotFound();
+                return BadRequest("Failed to create location");
             }
-            var location = await _context.Locations.FindAsync(id);
-            if (location == null)
+            _memoryCache.Remove(cacheKey);
+
+            return CreatedAtAction(nameof(GetLocation), new { companyId, locationId = createdLocation.LocationId }, createdLocation);
+        }
+
+        // DELETE: api/{companyId}/Location/{locationId}
+        [HttpDelete("{locationId}")]
+        public async Task<IActionResult> DeleteLocation(string companyId, int locationId)
+        {
+            var location = await _locationService.Get(companyId,  locationId);
+
+
+            //var location = locations.First();
+            var isDeleted = await _locationService.Delete(location.LocationId);
+            if (!isDeleted)
             {
-                return NotFound();
+                return BadRequest("Failed to delete location");
             }
 
-            _context.Locations.Remove(location);
-            await _context.SaveChangesAsync();
+            var cacheKey = $"Location_{companyId}_{locationId}";
+            _memoryCache.Remove(cacheKey);
 
             return NoContent();
-        }
-
-        private bool LocationExists(int id)
-        {
-            return (_context.Locations?.Any(e => e.LocationId == id)).GetValueOrDefault();
         }
     }
 }

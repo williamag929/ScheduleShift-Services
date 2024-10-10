@@ -365,3 +365,5 @@ FodyWeavers.xsd
 
 ShiftWork.Backend/appsettings.json
 ./appsettings.json
+ShiftWork.Backend/appsettings.json
+ShiftWork.Backend/appsettings.Development.json

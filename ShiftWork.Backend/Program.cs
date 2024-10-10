@@ -11,20 +11,22 @@ using ShiftWork.Backend.DTOs;
 using ShiftWork.Backend.Models;
 using ShiftWork.Backend.Services;
 using System.Text;
-using Microsoft.Extensions.Caching.Memory; // Add this import
-
+using Microsoft.Extensions.Caching.Memory;
+using Amazon.S3; // Add this import
+using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ShiftWorkContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ShiftWorkContext") ?? throw new InvalidOperationException("Connection string 'ShiftWorkContext' not found.")));
 
 // Add services to the container.
+var provider = builder.Services.BuildServiceProvider();
+var configuration = provider.GetService<IConfiguration>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 
 builder.Services.AddAutoMapper(typeof(Program));
 //builder.Services.Add(AppDomain.CurrentDomain.GetAssemblies());
@@ -32,9 +34,12 @@ builder.Services.AddAutoMapper(typeof(Program));
 // Register ScheduleShiftService with the DI container
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<IAreaService, AreaServices>();
+builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IScheduleShiftService, ScheduleShiftService>();
 builder.Services.AddScoped<ITaskShiftService, TaskShiftService>();
-
+builder.Services.AddScoped<IPeopleService, PeopleService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<ICompanyService, CompanyService>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -54,7 +59,7 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         //ValidateIssuerSigningKey = true
-         //"https://securetoken.google.com/shift-maps-location",
+        //"https://securetoken.google.com/shift-maps-location",
     };
 });
 
@@ -65,7 +70,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: apiCorsPolicy,
                       builder =>
                       {
-                          builder.WithOrigins("http://localhost:4200", 
+                          builder.WithOrigins("http://localhost:4200",
                               "https://localhost:4200",
                               "https://main.d23hrr0t3ac536.amplifyapp.com",
                               "https://williamag929-cuddly-space-garbanzo-57v9vvrg9q3px7-4200.preview.app.github.dev")
@@ -74,11 +79,29 @@ builder.Services.AddCors(options =>
                             .AllowCredentials();
                           //.WithMethods("OPTIONS", "GET");
                       });
-
 });
 
 // Register the memory cache service
 builder.Services.AddMemoryCache();
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddDistributedMemoryCache(options =>
+    {
+        options.SizeLimit = 2000 * 1024 * 1024; // 2000MB
+    });
+}
+else
+{
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = "localhost:32768";
+        options.InstanceName = "shift";
+    });
+}
+
+builder.Services.AddAWSService<IAmazonS3>(configuration.GetAWSOptions());
+builder.Services.AddScoped<IAwsS3Service, AwsS3Service>();
 
 var app = builder.Build();
 
@@ -87,7 +110,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
     app.UseDeveloperExceptionPage();
     //app.UseMigrationsEndPoint();
 }

@@ -35,7 +35,7 @@
  dotnet build
  
  docker build -t shiftworkbackend .
- docker run -d -p 8080:80 --name shiftworkbackend shiftworkbackend:latest
+ docker run -d -p 8080:80 --name shiftworkbackend waguirre82/shiftworkbackend:latest
 
  https://localhost:7054/Swagger/index.html
 

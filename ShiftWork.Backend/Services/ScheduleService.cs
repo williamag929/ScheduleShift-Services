@@ -8,117 +8,117 @@ using ShiftWork.Backend.Models;
 
 namespace ShiftWork.Backend.Services
 {
-    public class ScheduleShiftService : IScheduleShiftService
+    public class ScheduleService : IScheduleService
     {
         private readonly ShiftWorkContext _context;
 
-        public ScheduleShiftService(ShiftWorkContext context)
+        public ScheduleService(ShiftWorkContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         // Get all schedule shifts
-        public async Task<List<ScheduleShift>> GetAll(string companyId)
+        public async Task<List<Schedule>> GetAll(string companyId)
         {
             if (string.IsNullOrEmpty(companyId))
             {
                 throw new ArgumentException("Company ID cannot be null or empty", nameof(companyId));
             }
 
-            return await _context.ScheduleShifts
+            return await _context.Schedules
                 .Where(s => s.CompanyId == companyId && !s.IsDeleted)
                 .ToListAsync();
         }
 
         // Get a schedule shift by Id
-        public async Task<ScheduleShift> Get(string companyId, int scheduleShiftId)
+        public async Task<Schedule> Get(string companyId, int ScheduleId)
         {
             if (string.IsNullOrEmpty(companyId))
             {
                 throw new ArgumentException("Company ID cannot be null or empty", nameof(companyId));
             }
 
-            return await _context.ScheduleShifts
-                .FirstOrDefaultAsync(s => s.CompanyId == companyId && s.ScheduleShiftId == scheduleShiftId && !s.IsDeleted);
+            return await _context.Schedules
+                .FirstOrDefaultAsync(s => s.CompanyId == companyId && s.ScheduleId == ScheduleId && !s.IsDeleted);
         }
 
         // Add a new schedule shift
-        public async Task<ScheduleShift> Add(ScheduleShift scheduleShift)
+        public async Task<Schedule> Add(Schedule Schedule)
         {
-            if (scheduleShift == null)
+            if (Schedule == null)
             {
-                throw new ArgumentNullException(nameof(scheduleShift));
+                throw new ArgumentNullException(nameof(Schedule));
             }
 
-            await _context.ScheduleShifts.AddAsync(scheduleShift);
+            await _context.Schedules.AddAsync(Schedule);
             await _context.SaveChangesAsync();
-            return scheduleShift;
+            return Schedule;
         }
 
         // Update an existing schedule shift
-        public async Task<ScheduleShift> Update(ScheduleShift scheduleShift)
+        public async Task<Schedule> Update(Schedule Schedule)
         {
-            if (scheduleShift == null)
+            if (Schedule == null)
             {
-                throw new ArgumentNullException(nameof(scheduleShift));
+                throw new ArgumentNullException(nameof(Schedule));
             }
 
-            var existingScheduleShift = await _context.ScheduleShifts
-                .FirstOrDefaultAsync(s => s.ScheduleShiftId == scheduleShift.ScheduleShiftId);
+            var existingSchedule = await _context.Schedules
+                .FirstOrDefaultAsync(s => s.ScheduleId == Schedule.ScheduleId);
 
-            if (existingScheduleShift == null)
+            if (existingSchedule == null)
             {
                 throw new InvalidOperationException("Schedule shift not found");
             }
 
-            existingScheduleShift.Subject = scheduleShift.Subject;
-            existingScheduleShift.Description = scheduleShift.Description;
-            existingScheduleShift.StartTime = scheduleShift.StartTime;
-            existingScheduleShift.EndTime = scheduleShift.EndTime;
-            existingScheduleShift.PersonId = scheduleShift.PersonId;
-            existingScheduleShift.ScheduleId = scheduleShift.ScheduleId;
-            existingScheduleShift.AreaId = scheduleShift.AreaId;
-            existingScheduleShift.LocationId = scheduleShift.LocationId;
-            existingScheduleShift.GeoLocationStart = scheduleShift.GeoLocationStart;
-            existingScheduleShift.GeoLocationEnd = scheduleShift.GeoLocationEnd;
-            existingScheduleShift.IsActive = scheduleShift.IsActive;
-            existingScheduleShift.IsDeleted = scheduleShift.IsDeleted;
-            existingScheduleShift.IsApproved = scheduleShift.IsApproved;
-            existingScheduleShift.Updated = DateTime.UtcNow;
-            existingScheduleShift.AvatarImageIn = scheduleShift.AvatarImageIn;
-            existingScheduleShift.AvatarImageOut = scheduleShift.AvatarImageOut;
+            //existingSchedule.Subject = Schedule.Subject;
+            //existingSchedule.Description = Schedule.Description;
+            existingSchedule.StartTime = Schedule.StartTime;
+            existingSchedule.EndTime = Schedule.EndTime;
+            existingSchedule.PersonId = Schedule.PersonId;
+            existingSchedule.ScheduleId = Schedule.ScheduleId;
+            existingSchedule.AreaId = Schedule.AreaId;
+            existingSchedule.LocationId = Schedule.LocationId;
+            //existingSchedule.GeoLocationStart = Schedule.GeoLocationStart;
+            //existingSchedule.GeoLocationEnd = Schedule.GeoLocationEnd;
+            existingSchedule.IsActive = Schedule.IsActive;
+            existingSchedule.IsDeleted = Schedule.IsDeleted;
+            existingSchedule.IsApproved = Schedule.IsApproved;
+            existingSchedule.Updated = DateTime.UtcNow;
+            //existingSchedule.AvatarImageIn = Schedule.AvatarImageIn;
+            //existingSchedule.AvatarImageOut = Schedule.AvatarImageOut;
 
-            _context.ScheduleShifts.Update(existingScheduleShift);
+            _context.Schedules.Update(Schedule);
             await _context.SaveChangesAsync();
-            return existingScheduleShift;
+            return existingSchedule;
         }
 
         // Delete a schedule shift by Id
-        public async Task<bool> Delete(int scheduleShiftId)
+        public async Task<bool> Delete(int ScheduleId)
         {
-            var scheduleShift = await _context.ScheduleShifts
-                .FirstOrDefaultAsync(s => s.ScheduleShiftId == scheduleShiftId);
+            var Schedule = await _context.Schedules
+                .FirstOrDefaultAsync(s => s.ScheduleId == ScheduleId);
 
-            if (scheduleShift == null)
+            if (Schedule == null)
             {
                 throw new InvalidOperationException("Schedule shift not found");
             }
 
-            scheduleShift.IsDeleted = true;
-            scheduleShift.Deleted = DateTime.UtcNow;
+            Schedule.IsDeleted = true;
+            Schedule.Deleted = DateTime.UtcNow;
 
-            _context.ScheduleShifts.Update(scheduleShift);
+            _context.Schedules.Update(Schedule);
             await _context.SaveChangesAsync();
             return true;
         }
     }
 
-    public interface IScheduleShiftService
+    public interface IScheduleService
     {
-        Task<List<ScheduleShift>> GetAll(string companyId);
-        Task<ScheduleShift> Get(string companyId, int scheduleShiftId);
-        Task<ScheduleShift> Add(ScheduleShift scheduleShift);
-        Task<ScheduleShift> Update(ScheduleShift scheduleShift);
-        Task<bool> Delete(int scheduleShiftId);
+        Task<List<Schedule>> GetAll(string companyId);
+        Task<Schedule> Get(string companyId, int ScheduleId);
+        Task<Schedule> Add(Schedule Schedule);
+        Task<Schedule> Update(Schedule Schedule);
+        Task<bool> Delete(int ScheduleId);
     }
 }

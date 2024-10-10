@@ -1,143 +1,144 @@
-﻿using System;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using ShiftWork.Backend.DTOs;
+using ShiftWork.Backend.Models;
+using ShiftWork.Backend.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using ShiftWork.Backend.Data;
-using ShiftWork.Backend.Models;
+using System;
 
 namespace ShiftWork.Backend.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("api/{companyId}/[controller]")]
     [ApiController]
     public class RolesController : ControllerBase
     {
-        private readonly ShiftWorkContext _context;
+        private readonly IRoleService _roleService;
         private readonly IMapper _mapper;
+        private readonly IMemoryCache _memoryCache;
 
-        public RolesController(ShiftWorkContext context, IMapper mapper)
+        public RolesController(IRoleService roleService, IMapper mapper, IMemoryCache memoryCache)
         {
-            _context = context;
+            _roleService = roleService;
             _mapper = mapper;
+            _memoryCache = memoryCache;
         }
 
-        // GET: api/Roles
+        // GET: api/{companyId}/Roles
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Role>>> GetRoles([FromQuery] string companyId)
+        public async Task<ActionResult<IEnumerable<Role>>> GetRoles(string companyId)
         {
-          if (_context.Roles == null)
-          {
-              return NotFound();
-          }
-            return await _context.Roles.Where(c=>c.CompanyId == companyId).ToListAsync();
-        }
-
-        // GET: api/Roles/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Role>> GetRole([FromBody] string id)
-        {
-          if (_context.Roles == null)
-          {
-              return NotFound();
-          }
-            var role = await _context.Roles.FindAsync(id);
-
-            if (role == null)
+            var cacheKey = $"Roles_{companyId}";
+            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<Role> roles))
             {
-                return NotFound();
-            }
-
-            return role;
-        }
-
-        // PUT: api/Roles/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutRole(int id, Role role)
-        {
-            if (id != role.RoleId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(role).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!RoleExists(id))
+                roles = await _roleService.GetAll(companyId);
+                if (roles == null || !roles.Any())
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+
+                _memoryCache.Set(cacheKey, roles, cacheEntryOptions);
             }
 
-            return NoContent();
+            return Ok(roles);
         }
 
-        // POST: api/Roles
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Role>> PostRole(Role role)
+        // GET: api/{companyId}/Roles/{roleId}
+        [HttpGet("{roleId}")]
+        public async Task<ActionResult<Role>> GetRole(string companyId, int roleId)
         {
-          if (_context.Roles == null)
-          {
-              return Problem("Entity set 'ShiftWorkContext.Role'  is null.");
-          }
-            _context.Roles.Add(role);
-            try
+            var cacheKey = $"Role_{companyId}_{roleId}";
+            if (!_memoryCache.TryGetValue(cacheKey, out Role role))
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (RoleExists(role.RoleId))
+                 role = await _roleService.Get(companyId,  roleId );
+                if (role == null)
                 {
-                    return Conflict();
+                    return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+
+                _memoryCache.Set(cacheKey, role, cacheEntryOptions);
             }
 
-            return CreatedAtAction("GetRole", new { id = role.RoleId }, role);
+            return Ok(role);
         }
 
-        // DELETE: api/Roles/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteRole(string id)
+        // PUT: api/{companyId}/Roles
+        [HttpPut]
+        public async Task<IActionResult> PutRole(string companyId, [FromBody] RoleDto roleDto)
         {
-            if (_context.Roles == null)
+            if (roleDto.RoleId == null)
+            {
+                return BadRequest("RoleId is required");
+            }
+
+            var role = _mapper.Map<Role>(roleDto);
+            role.CompanyId = companyId;
+            //role.Update = DateTime.UtcNow;
+
+            var updatedRole = await _roleService.Update(role);
+            if (updatedRole == null)
             {
                 return NotFound();
             }
-            var role = await _context.Roles.FindAsync(id);
+
+            var cacheKey = $"Role_{companyId}_{roleDto.RoleId}";
+            _memoryCache.Remove(cacheKey);
+
+            return Ok(updatedRole);
+        }
+
+        // POST: api/{companyId}/Roles
+        [HttpPost]
+        public async Task<ActionResult<Role>> PostRole(string companyId, [FromBody] RoleDto roleDto)
+        {
+            var cacheKey = $"Roles_{companyId}";
+
+            var role = _mapper.Map<Role>(roleDto);
+            role.CompanyId = companyId;
+            //role.Created = DateTime.UtcNow;
+            //role.Updated = DateTime.UtcNow;
+            //role.IsActive = true;
+
+            var createdRole = await _roleService.Add(role);
+            if (createdRole == null)
+            {
+                return BadRequest("Failed to create role");
+            }
+            _memoryCache.Remove(cacheKey);
+
+            return CreatedAtAction(nameof(GetRole), new { companyId, roleId = createdRole.RoleId }, createdRole);
+        }
+
+        // DELETE: api/{companyId}/Roles/{roleId}
+        [HttpDelete("{roleId}")]
+        public async Task<IActionResult> DeleteRole(string companyId, int roleId)
+        {
+            var role = await _roleService.Get(companyId,  roleId );
             if (role == null)
             {
                 return NotFound();
             }
 
-            _context.Roles.Remove(role);
-            await _context.SaveChangesAsync();
+            var isDeleted = await _roleService.Delete(role.RoleId);
+            if (!isDeleted)
+            {
+                return BadRequest("Failed to delete role");
+            }
+
+            var cacheKey = $"Role_{companyId}_{roleId}";
+            _memoryCache.Remove(cacheKey);
 
             return NoContent();
-        }
-
-        private bool RoleExists(int id)
-        {
-            return (_context.Roles?.Any(e => e.RoleId == id)).GetValueOrDefault();
         }
     }
 }

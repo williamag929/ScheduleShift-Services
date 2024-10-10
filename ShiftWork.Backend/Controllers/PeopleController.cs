@@ -1,152 +1,143 @@
-﻿using System;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using ShiftWork.Backend.DTOs;
+using ShiftWork.Backend.Models;
+using ShiftWork.Backend.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
-using ShiftWork.Backend.Data;
-using ShiftWork.Backend.DTOs;
-using ShiftWork.Backend.Models;
 
 namespace ShiftWork.Backend.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("api/{companyId}/[controller]")]
     [ApiController]
     public class PeopleController : ControllerBase
     {
-        private readonly ShiftWorkContext _context;
+        private readonly IPeopleService _peopleService;
         private readonly IMapper _mapper;
+        private readonly IMemoryCache _memoryCache;
 
-        public PeopleController(ShiftWorkContext context, IMapper mapper)
+        public PeopleController(IPeopleService peopleService, IMapper mapper, IMemoryCache memoryCache)
         {
-            _context = context;
+            _peopleService = peopleService;
             _mapper = mapper;
+            _memoryCache = memoryCache;
         }
 
-        // GET: api/People
+        // GET: api/{companyId}/People
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Person>>> GetPerson([FromQuery] string companyId)
+        public async Task<ActionResult<IEnumerable<Person>>> GetPeople(string companyId)
         {
-          if (_context.People == null)
-          {
-              return NotFound();
-          }
-            return await _context.People.Where(c=>c.CompanyId == companyId).ToListAsync();
-        }
-
-        // GET: api/People/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Person>> GetPerson(int id)
-        {
-          if (_context.People == null)
-          {
-              return NotFound();
-          }
-            var person = await _context.People.FindAsync(id);
-
-            if (person == null)
+            var cacheKey = $"People_{companyId}";
+            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<Person> people))
             {
-                return NotFound();
-            }
-
-            return person;
-        }
-
-        // PUT: api/People/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutPerson(int id, PersonDto personDto)
-        {
-            if (id != personDto.PersonId)
-            {
-                return BadRequest();
-            }
-
-            var person = _mapper.Map<Person>(personDto);
-
-            _context.Entry(person).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PersonExists(id))
+                people = await _peopleService.GetAll(companyId);
+                if (people == null || !people.Any())
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+
+                _memoryCache.Set(cacheKey, people, cacheEntryOptions);
             }
 
-            return NoContent();
+            return Ok(people);
         }
 
-        // POST: api/People
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Person>> PostPerson(PersonDto personDto)
+        // GET: api/{companyId}/People/{personId}
+        [HttpGet("{personId}")]
+        public async Task<ActionResult<Person>> GetPerson(string companyId, int personId)
         {
-          if (_context.People == null)
-          {
-              return Problem("Entity set 'ShiftWorkContext.Person'  is null.");
-          }
+            var cacheKey = $"Person_{companyId}_{personId}";
+            if (!_memoryCache.TryGetValue(cacheKey, out Person person))
+            {
+                 person = await _peopleService.Get(companyId, personId );
+                if (person == null)
+                {
+                    return NotFound();
+                }
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+
+                _memoryCache.Set(cacheKey, person, cacheEntryOptions);
+            }
+
+            return Ok(person);
+        }
+
+        // PUT: api/{companyId}/People
+        [HttpPut]
+        public async Task<IActionResult> PutPerson(string companyId, [FromBody] PersonDto personDto)
+        {
+            if (personDto.PersonId == null)
+            {
+                return BadRequest("PersonId is required");
+            }
 
             var person = _mapper.Map<Person>(personDto);
-            person.CreatedDate = DateTime.Now;
-            _context.People.Add(person);
-            await _context.SaveChangesAsync();
+            person.CompanyId = companyId;
+            person.Updated = DateTime.UtcNow;
 
-            return CreatedAtAction("GetPerson", new { id = person.PersonId }, person);
+            var updatedPerson = await _peopleService.Update(person);
+            if (updatedPerson == null)
+            {
+                return NotFound();
+            }
+
+            var cacheKey = $"Person_{companyId}_{personDto.PersonId}";
+            _memoryCache.Remove(cacheKey);
+
+            return Ok(updatedPerson);
         }
 
-        // DELETE: api/People/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePerson(int id)
+        // POST: api/{companyId}/People
+        [HttpPost]
+        public async Task<ActionResult<Person>> PostPerson(string companyId, [FromBody] PersonDto personDto)
         {
-            if (_context.People == null)
+            var cacheKey = $"People_{companyId}";
+
+            var person = _mapper.Map<Person>(personDto);
+            person.CompanyId = companyId;
+            person.Created = DateTime.UtcNow;
+            person.Updated = DateTime.UtcNow;
+            person.IsActive = true;
+
+            var createdPerson = await _peopleService.Add(person);
+            if (createdPerson == null)
             {
-                return NotFound();
+                return BadRequest("Failed to create person");
             }
-            var person = await _context.People.FindAsync(id);
-            if (person == null)
+            _memoryCache.Remove(cacheKey);
+
+            return CreatedAtAction(nameof(GetPerson), new { companyId, personId = createdPerson.PersonId }, createdPerson);
+        }
+
+        // DELETE: api/{companyId}/People/{personId}
+        [HttpDelete("{personId}")]
+        public async Task<IActionResult> DeletePerson(string companyId, int personId)
+        {
+            var person  = await _peopleService.Get(companyId, personId);
+            if (person == null )
             {
                 return NotFound();
             }
 
-            _context.People.Remove(person);
-            await _context.SaveChangesAsync();
+            var isDeleted = await _peopleService.Delete(person.PersonId);
+            if (!isDeleted)
+            {
+                return BadRequest("Failed to delete person");
+            }
+
+            var cacheKey = $"Person_{companyId}_{personId}";
+            _memoryCache.Remove(cacheKey);
 
             return NoContent();
-        }
-
-        private bool PersonExists(int id)
-        {
-            return (_context.People?.Any(e => e.PersonId == id)).GetValueOrDefault();
-        }
-        [HttpPost]
-        [Route("login")]
-        public async Task<IActionResult> loginPerson(LoginDto loginDto)
-        {
-            try
-            {
-                var personValidated = await _context.People.Where(x => x.Email == loginDto.Email
-                 && x.PrivateKey == loginDto.Password).FirstAsync();
-                return Ok(personValidated.PersonId);
-              
-
-            }catch(Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
-     
         }
     }
 }

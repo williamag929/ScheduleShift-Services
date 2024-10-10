@@ -10,43 +10,47 @@ using Microsoft.EntityFrameworkCore;
 using ShiftWork.Backend.Data;
 using ShiftWork.Backend.DTOs;
 using ShiftWork.Backend.Models;
+using ShiftWork.Backend.Services;
 
 namespace ShiftWork.Backend.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("api/{companyId}/[controller]")]
     [ApiController]
     public class TaskShiftsController : ControllerBase
     {
+        private readonly ITaskShiftService _taskShiftService;
         private readonly ShiftWorkContext _context;
         private readonly IMapper _mapper;
 
-        public TaskShiftsController(ShiftWorkContext context, IMapper mapper)
+        public TaskShiftsController(ShiftWorkContext context, IMapper mapper, ITaskShiftService taskShiftService)
         {
             _context = context;
             _mapper = mapper;
+            _taskShiftService = taskShiftService;
         }
 
         // GET: api/TaskShifts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TaskShift>>> GetTaskShift([FromQuery] string companyId)
+        public async Task<ActionResult<IEnumerable<TaskShift>>> GetTaskShift(string companyId)
         {
+           var tasks = await _taskShiftService.GetAll(companyId);
           if (_context.TaskShifts == null)
           {
               return NotFound();
           }
-            return await _context.TaskShifts.Where(c=>c.CompanyId == companyId).ToListAsync();
+            return tasks.ToList();  
         }
 
         // GET: api/TaskShifts/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<TaskShift>> GetTaskShift(int id)
+        public async Task<ActionResult<TaskShift>> GetTaskShift(string companyId, int id)
         {
           if (_context.TaskShifts == null)
           {
               return NotFound();
           }
-            var taskShift = await _context.TaskShifts.FindAsync(id);
+            var taskShift = await _taskShiftService.Get(companyId, id );
 
             if (taskShift == null)
             {
@@ -69,25 +73,15 @@ namespace ShiftWork.Backend.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(taskShift).State = EntityState.Modified;
+            var updatedtaskShift = await _taskShiftService.Update(taskShift);
+            //_context.Entry(taskShift).State = EntityState.Modified;
 
-            try
+           if (updatedtaskShift == null)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TaskShiftExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
 
-            return NoContent();
+             return Ok(updatedtaskShift);
         }
 
         // POST: api/TaskShifts
@@ -105,10 +99,12 @@ namespace ShiftWork.Backend.Controllers
             taskShift.Created = DateTime.Now;
             taskShift.Updated = DateTime.Now;
             taskShift.Deleted = DateTime.Now;
-            _context.TaskShifts.Add(taskShift);
-            await _context.SaveChangesAsync();
+            
+            var createdTask = await _taskShiftService.Add(taskShift);
+            //_context.TaskShifts.Add(taskShift);
+            //await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetTaskShift", new { id = taskShift.TaskShiftId }, taskShift);
+            return CreatedAtAction("GetTaskShift", new { id = createdTask.TaskShiftId }, createdTask);
         }
 
         // DELETE: api/TaskShifts/5
@@ -125,8 +121,12 @@ namespace ShiftWork.Backend.Controllers
                 return NotFound();
             }
 
-            _context.TaskShifts.Remove(taskShift);
-            await _context.SaveChangesAsync();
+            var isDeleted = await _taskShiftService.Delete(id);
+
+            if (!isDeleted)
+            {
+                return BadRequest("Failed to delete location");
+            }
 
             return NoContent();
         }
