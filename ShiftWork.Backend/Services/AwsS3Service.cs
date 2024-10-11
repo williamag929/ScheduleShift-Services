@@ -11,7 +11,7 @@ using ShiftWork.Backend.Models;
 namespace ShiftWork.Backend.Services
 {
 
- public class AwsS3Service : IAwsS3Service
+    public class AwsS3Service : IAwsS3Service
     {
         private readonly IAmazonS3 _awsS3Client;
 
@@ -101,14 +101,19 @@ namespace ShiftWork.Backend.Services
         /// </summary>
         /// <param name="bucketName">Upload a file to a bucket</param>
         /// <returns></returns>
-        public async Task<AwsS3Response> UploadFileAsync(string bucketName)
+        public async Task<AwsS3Response> UploadFileAsync(string bucketName, string fileName)
         {
             try
             {
+
+                if (string.IsNullOrEmpty(fileName))
+                    fileName = FilePathToUpload;
                 var fileTransferUtility = new TransferUtility(_awsS3Client);
 
                 // Option 1 (Upload an existing file in your computer to the S3)
-                await fileTransferUtility.UploadAsync(FilePathToUpload, bucketName);
+                //await fileTransferUtility.UploadAsync(FilePathToUpload, bucketName);
+
+                await fileTransferUtility.UploadAsync(fileName, bucketName);
 
                 // Option2 (Upload and create the file in the process)
                 //await fileTransferUtility.UploadAsync(FilePath, bucketName, UploadWithKeyName);
@@ -222,6 +227,11 @@ namespace ShiftWork.Backend.Services
                 return new AwsS3Response { Message = e.Message, Status = HttpStatusCode.InternalServerError };
             }
         }
+
+        public Task<AwsS3Response> UploadFileAsync(string bucketName)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public interface IAwsS3Service
@@ -235,6 +245,6 @@ namespace ShiftWork.Backend.Services
         Task<AwsS3Response> GetObjectFromS3Async(string bucketName, string keyName);
 
         Task<AwsS3Response> DeleteObjectFromS3Async(string bucketName, string keyName);
-    }    
+    }
 
 }

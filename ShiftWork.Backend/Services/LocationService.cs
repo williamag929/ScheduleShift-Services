@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using ShiftWork.Backend.Data;
 using ShiftWork.Backend.Models;
@@ -11,10 +12,13 @@ namespace ShiftWork.Backend.Services
     public class LocationService : ILocationService
     {
         private readonly ShiftWorkContext _context;
+        private readonly ILogger<CompanyService> _logger;
+        private readonly IRepository<Location> _repository;        
 
         public LocationService(ShiftWorkContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _repository = new LocationRepository(_context);
         }
 
         // Get all locations
@@ -24,10 +28,8 @@ namespace ShiftWork.Backend.Services
             {
                 throw new ArgumentException("Company ID cannot be null or empty", nameof(companyId));
             }
-
-            return await _context.Locations
-                .Where(c => c.CompanyId == companyId)
-                .ToListAsync();
+            var locations = await _repository.GetAll(companyId, null);
+            return locations.ToList();
         }
 
         // Get a location by Id
@@ -35,10 +37,16 @@ namespace ShiftWork.Backend.Services
         {
             if (string.IsNullOrEmpty(companyId))
             {
-                throw new ArgumentException("Company ID cannot be null or empty", nameof(companyId));
+                throw new ArgumentException("Company ID cannot be null or empty", nameof(locationId));
             }
 
-            return await _context.Locations.FirstOrDefaultAsync(c => c.CompanyId == companyId && c.LocationId == locationId);
+            var entity = await _repository.GetById(locationId);
+            if (entity == null)
+                throw new ArgumentException("Not Found", nameof(locationId));
+            
+            if (entity.CompanyId != companyId)
+                throw new ArgumentException("Company not match", nameof(locationId));            
+            return entity;
         }
 
         // Add a new location
@@ -49,10 +57,8 @@ namespace ShiftWork.Backend.Services
                 throw new ArgumentNullException(nameof(location));
             }
 
-            await _context.Locations.AddAsync(location);
-            await _context.SaveChangesAsync();
-
-            return location;
+           var result = await _repository.Add(location);
+            return result;
         }
 
         // Update an existing location
@@ -63,36 +69,30 @@ namespace ShiftWork.Backend.Services
                 throw new ArgumentNullException(nameof(location));
             }
 
-            var existingLocation = await _context.Locations
-                .FirstOrDefaultAsync(l => l.LocationId == location.LocationId);
+            var existingLocation = await _repository.GetById(location.LocationId);
 
             if (existingLocation == null)
             {
                 throw new InvalidOperationException("Location not found");
             }
 
-            existingLocation.LocationName = location.LocationName;
-            existingLocation.LocationAddress = location.LocationAddress;
-            existingLocation.Updated = DateTime.UtcNow;
-
-            _context.Locations.Update(existingLocation);
+            var result = await _repository.Update(location);
             await _context.SaveChangesAsync();
 
-            return existingLocation;
+            return result;
         }
 
         // Delete a location by Id
         public async Task<bool> Delete(int locationId)
         {
-            var location = await _context.Locations
-                .FirstOrDefaultAsync(l => l.LocationId == locationId);
+            var existingLocation = await _repository.GetById(locationId);
 
-            if (location == null)
+            if (existingLocation == null)
             {
                 throw new InvalidOperationException("Location not found");
             }
 
-            _context.Locations.Remove(location);
+            await _repository.Delete(existingLocation);
             await _context.SaveChangesAsync();
 
             return true;

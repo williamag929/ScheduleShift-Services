@@ -1,52 +1,78 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Http.HttpResults;
+using ShiftWork.Backend.Models;
+using Microsoft.Extensions.Logging;
+using ShiftWork.Backend.Data;
 
 
 namespace ShiftWork.Backend.Services
 {
-public class CompanyService : ICompanyService
-{
-    private readonly IRepository<Company> _companyRepository;
-    //private readonly ShiftWorkContext _context;
-
-    public CompanyService(IRepository<Company> companyRepository)
+    public class CompanyService : ICompanyService
     {
-        _companyRepository = companyRepository;
-    }
+        private readonly ShiftWorkContext _context;
+        private readonly ILogger<CompanyService> _logger;
+        private readonly ICompanyRepository<Company> _companyRepository;
+        //private readonly ShiftWorkContext _context;
 
-    public List<Company> GetAllCompanies()
-    {
-        return _companyRepository.GetAll();
-    }
+        public CompanyService(ShiftWorkContext context,ILogger<CompanyService> logger)
+        {
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger;
+            _companyRepository = new CompanyRepository(_context);
+        }
 
-    public Company GetCompanyById(int companyId)
-    {
-        return _companyRepository.GetById(companyId);
-    }
+        public async Task<IEnumerable<Company>> GetAllCompanies()
+        {
+            return _companyRepository.GetAll();
+        }
 
-    public void AddCompany(Company company)
-    {
-        _companyRepository.Add(company);
-    }
+        public async Task<Company> GetCompanyById(string companyId)
+        {
+            return await _companyRepository.GetById(companyId);
+        }
 
-    public void UpdateCompany(Company company)
-    {
-        _companyRepository.Update(company);
-    }
+        public async Task<Company> AddCompany(Company company)
+        {
+            return await _companyRepository.Add(company);
+        }
 
-    public void DeleteCompany(int companyId)
-    {
-        _companyRepository.Delete(companyId);
+        public async Task<Company> UpdateCompany(Company company)
+        {
+            return await _companyRepository.Update(company);
+        }
+
+        public async Task<bool> DeleteCompany(string companyId)
+        {
+            try
+            {
+                Company entity = await _companyRepository.GetById(companyId);
+                if (entity != null){
+                    await _companyRepository.Delete(entity);
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return false;
+            }
+        }
+
+        public Task<Company> GetCompany(string companyId)
+        {
+            throw new NotImplementedException();
+        }
     }
-}
 
     public interface ICompanyService
     {
-        Task<IEnumerable<Company>> GetAll();
-        Task<Company> Get(string companyId);
-        Task<Company> Add(Company company);
-        Task<Company> Update(Company company);
-        Task<bool> Delete(int companyId);
+        Task<IEnumerable<Company>> GetAllCompanies();
+        Task<Company> GetCompany(string companyId);
+        Task<Company> AddCompany(Company company);
+        Task<Company> UpdateCompany(Company company);
+        Task<bool> DeleteCompany(string companyId);
     }
 
 }

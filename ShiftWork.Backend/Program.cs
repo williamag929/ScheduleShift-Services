@@ -14,6 +14,7 @@ using System.Text;
 using Microsoft.Extensions.Caching.Memory;
 using Amazon.S3; // Add this import
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ShiftWorkContext>(options =>
@@ -40,6 +41,8 @@ builder.Services.AddScoped<ITaskShiftService, TaskShiftService>();
 builder.Services.AddScoped<IPeopleService, PeopleService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
+//builder.Services.AddScoped<IRepository, CompanyRepository>();
+
 
 builder.Services.AddAuthentication(options =>
 {
@@ -102,6 +105,10 @@ else
 
 builder.Services.AddAWSService<IAmazonS3>(configuration.GetAWSOptions());
 builder.Services.AddScoped<IAwsS3Service, AwsS3Service>();
+
+builder.Services.AddLogging(builder => builder.AddConsole());
+//using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
+//ILogger logger = factory.CreateLogger<Program>();
 
 var app = builder.Build();
 

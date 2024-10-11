@@ -27,9 +27,9 @@ namespace ShiftWork.Backend.Controllers
 
         // GET: api/Company/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Company>> GetCompany(int id)
+        public async Task<ActionResult<Company>> GetCompany(string id)
         {
-            var company = await _companyService.GetCompanyByIdAsync(id);
+            var company = await _companyService.GetCompany(id);
 
             if (company == null)
             {
@@ -48,22 +48,22 @@ namespace ShiftWork.Backend.Controllers
                 return BadRequest();
             }
 
-            await _companyService.CreateCompanyAsync(company);
-            return CreatedAtAction(nameof(GetCompany), new { id = company.Id }, company);
+            await _companyService.AddCompany(company);
+            return CreatedAtAction(nameof(GetCompany), new { id = company.CompanyId }, company);
         }
 
         // PUT: api/Company/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCompany(int id, Company company)
+        public async Task<IActionResult> UpdateCompany(string id, Company company)
         {
-            if (id != company.Id)
+            if (id != company.CompanyId.ToString())
             {
                 return BadRequest();
             }
 
-            var updated = await _companyService.UpdateCompanyAsync(company);
+            var entity = await _companyService.UpdateCompany(company);
 
-            if (!updated)
+            if (entity == null)
             {
                 return NotFound();
             }
@@ -73,9 +73,9 @@ namespace ShiftWork.Backend.Controllers
 
         // DELETE: api/Company/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCompany(int id)
+        public async Task<IActionResult> DeleteCompany(string id)
         {
-            var deleted = await _companyService.DeleteCompanyAsync(id);
+            var deleted = await _companyService.DeleteCompany(id);
 
             if (!deleted)
             {

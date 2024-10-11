@@ -1,49 +1,56 @@
+using Microsoft.EntityFrameworkCore;
+using ShiftWork.Backend.Data;
+using ShiftWork.Backend.Models;
 
-
-
-
-public class CompanyRepository : IRepository<Company>
+namespace ShiftWork.Backend.Services
 {
-    private readonly ShiftWorkContext _context;
-    private readonly DbSet<Company> _dbSet;
 
-    public EntityFrameworkRepository(DbContext context)
+    public class CompanyRepository : ICompanyRepository<Company>
     {
-        _context = context;
-        _dbSet = _context.Set<Company>();
-    }    
-    public List<Company> GetAll()
-    {
-        return _dbSet.ToList();
+        private readonly DbContext _context;
+        private readonly DbSet<Company> _dbSet;
+
+        public CompanyRepository(DbContext context)
+        {
+            _context = context;
+            _dbSet = _context.Set<Company>();
+        }
+        public List<Company> GetAll()
+        {
+            return _dbSet.ToList();
+        }
+
+        public async Task<Company> GetById(string id)
+        {
+            return await _dbSet.FindAsync(id);
+        }
+
+        public async Task<Company> Add(Company entity)
+        {
+            await _dbSet.AddAsync(entity);
+            return entity;
+        }
+
+        public async Task<Company> Update(Company entity)
+        {
+            _context.Entry(entity).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return entity;
+        }
+
+        public async Task Delete(Company entity)
+        {
+            _dbSet.Remove(entity);
+        }
     }
 
-    public Company GetById(string id)
+
+    public interface ICompanyRepository<T>
     {
-        return _dbSet.Find(id);
+        List<T> GetAll();
+        Task<T> GetById(string id);
+        Task<T> Add(T entity);
+        Task<T> Update(T entity);
+        Task Delete(T entity);
     }
-
-    public void Add(Company entity)
-    {
-        _dbSet.Add(entity);
-    }
-
-    public void Update(Company entity)
-    {
-        _context.Entry(entity).State = EntityState.Modified;
-    }
-
-    public void Delete(Company entity)
-    {
-        _dbSet.Remove(entity);
-    }
-}
-
-
-public interface IRepository<T>
-{
-    List<T> GetAll();
-    T GetById(int id);
-    void Add(T entity);
-    void Update(T entity);
-    void Delete(int id);
 }
