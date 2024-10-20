@@ -33,6 +33,8 @@ builder.Services.AddAutoMapper(typeof(Program));
 //builder.Services.Add(AppDomain.CurrentDomain.GetAssemblies());
 
 // Register ScheduleShiftService with the DI container
+
+
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<IAreaService, AreaServices>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
@@ -40,8 +42,12 @@ builder.Services.AddScoped<IScheduleShiftService, ScheduleShiftService>();
 builder.Services.AddScoped<ITaskShiftService, TaskShiftService>();
 builder.Services.AddScoped<IPeopleService, PeopleService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+
 builder.Services.AddScoped<ICompanyService, CompanyService>();
-//builder.Services.AddScoped<IRepository, CompanyRepository>();
+
+builder.Services.AddScoped<ILocationRepository<ShiftWork.Backend.Models.Location>, LocationRepository>();
+builder.Services.AddScoped<ICompanyRepository<Company>, CompanyRepository>();
+
 
 
 builder.Services.AddAuthentication(options =>

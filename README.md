@@ -9,7 +9,7 @@
 
 ***Technology**
 
-    *FrontEnd: Angular 14.0*
+    *FrontEnd: Angular 17.0*
     *Backend: NetCore 6.0*
     *Database: Sql Server*
     *schedule: full calendar 6.0*
@@ -56,14 +56,16 @@ docker run -d -it -p 80:80/tcp --name shift-workfrontend shiftworkfrontend:lates
 
 # database update #
 
-Package Manager Console
+1. on visual studio open -Package Manager Console
 
-PM>   Add-Migration AddTAskTimeStart
+2. PM>   Add-Migration AddTAsk{TimeStart}
 
 PM> Update-Database
 
-Console
 
-dotnet ef database update
+
+# Console #
+
+1. dotnet ef database update
 
 

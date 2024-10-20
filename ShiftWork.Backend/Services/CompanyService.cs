@@ -15,11 +15,13 @@ namespace ShiftWork.Backend.Services
         private readonly ICompanyRepository<Company> _companyRepository;
         //private readonly ShiftWorkContext _context;
 
-        public CompanyService(ShiftWorkContext context,ILogger<CompanyService> logger)
+        public CompanyService(ShiftWorkContext context,ILogger<CompanyService> logger,
+        ICompanyRepository<Company> repository)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger;
-            _companyRepository = new CompanyRepository(_context);
+            _companyRepository = repository ?? throw new ArgumentNullException(nameof(repository));
+            //_companyRepository = new CompanyRepository(_context);
         }
 
         public async Task<IEnumerable<Company>> GetAllCompanies()

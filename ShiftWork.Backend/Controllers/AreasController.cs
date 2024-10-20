@@ -77,7 +77,7 @@ namespace ShiftWork.Backend.Controllers
         }
 
         // PUT: api/{companyId}/Areas
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<IActionResult> PutArea(string companyId, [FromBody] AreaDto areaDto)
         {
             if (areaDto.AreaId == null)
@@ -86,7 +86,7 @@ namespace ShiftWork.Backend.Controllers
             }
 
             var area = _mapper.Map<Area>(areaDto);
-            area.CompanyId = companyId;
+
             area.Updated = DateTime.UtcNow;
 
             var updatedArea = await _areaService.Update(area);
@@ -109,6 +109,7 @@ namespace ShiftWork.Backend.Controllers
 
             var area = _mapper.Map<Area>(areaDto);
             area.CompanyId = companyId;
+            area.LocationId = areaDto.LocationId;
             area.Created = DateTime.UtcNow;
             area.Updated = DateTime.UtcNow;
             area.IsActive = true;
@@ -140,7 +141,7 @@ namespace ShiftWork.Backend.Controllers
                 return BadRequest("Failed to delete area");
             }
 
-            var cacheKey = $"Area_{companyId}_{areaId}";
+            var cacheKey = $"Areas_{companyId}";
             _memoryCache.Remove(cacheKey);
 
             return NoContent();

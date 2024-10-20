@@ -54,11 +54,11 @@ namespace ShiftWork.Backend.Controllers
         public async Task<ActionResult<Location>> GetLocation(string companyId, int locationId)
         {
             var cacheKey = $"Location_{companyId}_{locationId}";
-            if (!_memoryCache.TryGetValue(cacheKey, out Location location))
+            if (!_memoryCache.TryGetValue(cacheKey, out Location _location))
             {
-                location = await _locationService.Get(companyId, locationId );
+                _location = await _locationService.Get(companyId, locationId );
 
-                if (location == null)
+                if (_location == null)
                 {
                     return NotFound();
                 }
@@ -66,32 +66,37 @@ namespace ShiftWork.Backend.Controllers
                 var cacheEntryOptions = new MemoryCacheEntryOptions()
                     .SetSlidingExpiration(TimeSpan.FromMinutes(5));
 
-                _memoryCache.Set(cacheKey, location, cacheEntryOptions);
+                _memoryCache.Set(cacheKey, _location, cacheEntryOptions);
             }
 
-            return Ok(location);
+            return Ok(_location);
         }
 
         // PUT: api/{companyId}/Location
-        [HttpPut]
-        public async Task<IActionResult> PutLocation(string companyId, [FromBody] LocationDto locationDto)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutLocation(int id, [FromBody] LocationDto locationDto)
         {
             if (locationDto.LocationId == null)
             {
                 return BadRequest("LocationId is required");
             }
 
-            var location = _mapper.Map<Location>(locationDto);
-            location.CompanyId = companyId;
-            location.Updated = DateTime.UtcNow;
+            var locationModel = _mapper.Map<Location>(locationDto);
 
-            var updatedLocation = await _locationService.Update(location);
+            if (id != locationModel.LocationId)
+            {
+                return BadRequest();
+            }
+
+            locationModel.Updated = DateTime.UtcNow;
+
+            var updatedLocation = await _locationService.Update(locationModel);
             if (updatedLocation == null)
             {
                 return NotFound();
             }
 
-            var cacheKey = $"Location_{companyId}_{locationDto.LocationId}";
+            var cacheKey = $"Location_{locationModel.CompanyId}_{locationDto.LocationId}";
             _memoryCache.Remove(cacheKey);
 
             return Ok(updatedLocation);
@@ -133,7 +138,7 @@ namespace ShiftWork.Backend.Controllers
                 return BadRequest("Failed to delete location");
             }
 
-            var cacheKey = $"Location_{companyId}_{locationId}";
+            var cacheKey = $"Locations_{companyId}";
             _memoryCache.Remove(cacheKey);
 
             return NoContent();

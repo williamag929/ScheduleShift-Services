@@ -29,8 +29,12 @@ namespace ShiftWork.Backend.Services
 
         public async Task<Area> Add(Area area)
         {
-            await _context.Areas.AddAsync(area);
+            if (area == null)
+            {
+                throw new ArgumentNullException(nameof(area));
+            }
 
+            await _context.Areas.AddAsync(area);
             await _context.SaveChangesAsync();
 
             return area;
@@ -38,14 +42,22 @@ namespace ShiftWork.Backend.Services
 
         public async Task<Area> Update(Area area)
         {
+            if (area == null)
+            {
+                throw new ArgumentNullException(nameof(area));
+            }
             var areaForChanges = await _context.Areas.SingleAsync(x => x.AreaId == area.AreaId);
+            if (areaForChanges == null)
+            {
+                throw new InvalidOperationException("Location not found");
+            }
 
-            areaForChanges.AreaId = area.AreaId;
             areaForChanges.AreaName = area.AreaName;
             areaForChanges.LocationId = area.LocationId;
-            areaForChanges.CompanyId = area.CompanyId;
             areaForChanges.IsActive = area.IsActive;
             areaForChanges.IsDeleted = area.IsDeleted;
+            areaForChanges.IsActive = area.IsActive;
+            areaForChanges.Deleted = area.Deleted;
             areaForChanges.Updated = DateTime.UtcNow;
 
             _context.Areas.Update(areaForChanges);

@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace ShiftWork.Backend.Services
 {
-    public class LocationRepository : IRepository<Location>
+    public class LocationRepository : ILocationRepository<Location>
     {
-        private readonly DbContext _context;
+        private readonly ShiftWorkContext _context;
         private readonly DbSet<Location> _dbSet;
 
-        public LocationRepository(DbContext context)
+        public LocationRepository(ShiftWorkContext context)
         {
             _context = context;
             _dbSet = _context.Set<Location>();
@@ -46,5 +46,14 @@ namespace ShiftWork.Backend.Services
             _dbSet.Remove(entity);
             await _context.SaveChangesAsync();
         }
+    }
+
+    public interface ILocationRepository<T>
+    {
+        Task<List<T>> GetAll(string companyId, int[] ids);
+        Task<T> GetById(int id);
+        Task<T> Add(T entity);
+        Task<T> Update(T entity);
+        Task Delete(T entity);
     }
 }

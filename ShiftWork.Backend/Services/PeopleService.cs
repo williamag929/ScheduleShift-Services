@@ -91,6 +91,17 @@ namespace ShiftWork.Backend.Services
             existingPerson.FirstName = person.FirstName;
             existingPerson.LastName = person.LastName;
             existingPerson.Email = person.Email;
+            existingPerson.DocumentNumber = person.DocumentNumber;
+            existingPerson.PhoneNumber = person.PhoneNumber;
+            existingPerson.IsActive = person.IsActive;
+            existingPerson.isManager = person.isManager;
+            existingPerson.isSchedule = person.isSchedule;
+            existingPerson.MainAddress = person.MainAddress;
+            existingPerson.ManagerId = person.ManagerId;
+            existingPerson.IsDeleted = person.IsDeleted;
+            existingPerson.PrimaryPhone = person.PrimaryPhone;
+            existingPerson.PrivateKey = person.PrivateKey;
+            existingPerson.Deleted = person.Deleted;
             existingPerson.Updated = DateTime.UtcNow;
 
             _context.People.Update(existingPerson);

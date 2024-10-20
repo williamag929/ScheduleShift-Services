@@ -7,10 +7,10 @@ namespace ShiftWork.Backend.Services
 
     public class CompanyRepository : ICompanyRepository<Company>
     {
-        private readonly DbContext _context;
+        private readonly ShiftWorkContext _context;
         private readonly DbSet<Company> _dbSet;
 
-        public CompanyRepository(DbContext context)
+        public CompanyRepository(ShiftWorkContext context)
         {
             _context = context;
             _dbSet = _context.Set<Company>();

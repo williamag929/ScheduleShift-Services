@@ -13,12 +13,12 @@ namespace ShiftWork.Backend.Services
     {
         private readonly ShiftWorkContext _context;
         private readonly ILogger<CompanyService> _logger;
-        private readonly IRepository<Location> _repository;        
+        private readonly ILocationRepository<Location> _repository;        
 
-        public LocationService(ShiftWorkContext context)
+        public LocationService(ShiftWorkContext context, ILocationRepository<Location> repository)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
-            _repository = new LocationRepository(_context);
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
         // Get all locations
@@ -50,36 +50,54 @@ namespace ShiftWork.Backend.Services
         }
 
         // Add a new location
-        public async Task<Location> Add(Location location)
+        public async Task<Location> Add(Location _location)
         {
-            if (location == null)
+            if (_location == null)
             {
-                throw new ArgumentNullException(nameof(location));
+                throw new ArgumentNullException(nameof(_location));
             }
 
-           var result = await _repository.Add(location);
+           var result = await _repository.Add(_location);
             return result;
         }
 
         // Update an existing location
-        public async Task<Location> Update(Location location)
+        public async Task<Location> Update(Location _location)
         {
-            if (location == null)
+            if (_location == null)
             {
-                throw new ArgumentNullException(nameof(location));
+                throw new ArgumentNullException(nameof(_location));
             }
 
-            var existingLocation = await _repository.GetById(location.LocationId);
+            var existingLocation = await _repository.GetById(_location.LocationId);
 
             if (existingLocation == null)
             {
                 throw new InvalidOperationException("Location not found");
             }
 
-            var result = await _repository.Update(location);
-            await _context.SaveChangesAsync();
+            existingLocation.LocationName = _location.LocationName;
+            existingLocation.CityCode = _location.CityCode;
+            existingLocation.CountryCode = _location.CountryCode;
+            existingLocation.RatioMax = _location.RatioMax; 
+            existingLocation.Ration = _location.Ration;
+            existingLocation.Deleted = _location.Deleted;
+            existingLocation.GeoLocation = _location.GeoLocation;
+            existingLocation.Notification = _location.Notification;
+            existingLocation.IsActive = _location.IsActive;
+            existingLocation.IsDeleted = _location.IsDeleted;   
+            existingLocation.Latitude = _location.Latitude;
+            existingLocation.Longitude = _location.Longitude;
+            existingLocation.LocationAddress = _location.LocationAddress;
+            existingLocation.LocationConfig = _location.LocationConfig;
+            existingLocation.StateCode = _location.StateCode;
+            existingLocation.TimeZoneId = _location.TimeZoneId;
+            existingLocation.ValidateOnSite = _location.ValidateOnSite;
+            existingLocation.ValidateRatio = _location.ValidateRatio;
 
-            return result;
+            await _repository.Update(existingLocation);
+
+            return existingLocation;
         }
 
         // Delete a location by Id
@@ -103,8 +121,8 @@ namespace ShiftWork.Backend.Services
     {
         Task<IEnumerable<Location>> GetAll(string companyId);
         Task<Location> Get(string companyId, int locationId);
-        Task<Location> Add(Location location);
-        Task<Location> Update(Location location);
+        Task<Location> Add(Location _location);
+        Task<Location> Update(Location _location);
         Task<bool> Delete(int locationId);
     }
 }
