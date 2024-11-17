@@ -93,6 +93,9 @@ builder.Services.AddCors(options =>
 // Register the memory cache service
 builder.Services.AddMemoryCache();
 
+ 
+
+
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddDistributedMemoryCache(options =>
@@ -113,6 +116,7 @@ builder.Services.AddAWSService<IAmazonS3>(configuration.GetAWSOptions());
 builder.Services.AddScoped<IAwsS3Service, AwsS3Service>();
 
 builder.Services.AddLogging(builder => builder.AddConsole());
+builder.Services.AddHttpClient<WebhookEmitterService>();
 //using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
 //ILogger logger = factory.CreateLogger<Program>();
 
