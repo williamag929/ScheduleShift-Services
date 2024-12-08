@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
@@ -14,28 +14,28 @@ namespace ShiftWork.Backend.Controllers
     [Authorize]
     [Route("api/{companyId}/[controller]")]
     [ApiController]
-    public class PeopleController : ControllerBase
+    public class PersonController : ControllerBase
     {
-        private readonly IPersonService _peopleService;
+        private readonly IPersonService _PersonService;
         private readonly IMapper _mapper;
         private readonly IMemoryCache _memoryCache;
 
-        public PeopleController(IPersonService peopleService, IMapper mapper, IMemoryCache memoryCache)
+        public PersonController(IPersonService PersonService, IMapper mapper, IMemoryCache memoryCache)
         {
-            _peopleService = peopleService;
+            _PersonService = PersonService;
             _mapper = mapper;
             _memoryCache = memoryCache;
         }
 
-        // GET: api/{companyId}/People
+        // GET: api/{companyId}/Person
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Person>>> GetPeople(string companyId)
+        public async Task<ActionResult<IEnumerable<Person>>> GetPerson(string companyId)
         {
-            var cacheKey = $"People_{companyId}";
-            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<Person> people))
+            var cacheKey = $"Person_{companyId}";
+            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<Person> Person))
             {
-                people = await _peopleService.GetAll(companyId);
-                if (people == null || !people.Any())
+                Person = await _PersonService.GetAll(companyId);
+                if (Person == null || !Person.Any())
                 {
                     return NotFound();
                 }
@@ -43,20 +43,20 @@ namespace ShiftWork.Backend.Controllers
                 var cacheEntryOptions = new MemoryCacheEntryOptions()
                     .SetSlidingExpiration(TimeSpan.FromMinutes(5));
 
-                _memoryCache.Set(cacheKey, people, cacheEntryOptions);
+                _memoryCache.Set(cacheKey, Person, cacheEntryOptions);
             }
 
-            return Ok(people);
+            return Ok(Person);
         }
 
-        // GET: api/{companyId}/People/{personId}
+        // GET: api/{companyId}/Person/{personId}
         [HttpGet("{personId}")]
         public async Task<ActionResult<Person>> GetPerson(string companyId, int personId)
         {
             var cacheKey = $"Person_{companyId}_{personId}";
             if (!_memoryCache.TryGetValue(cacheKey, out Person person))
             {
-                 person = await _peopleService.Get(companyId, personId );
+                 person = await _PersonService.Get(companyId, personId );
                 if (person == null)
                 {
                     return NotFound();
@@ -71,7 +71,7 @@ namespace ShiftWork.Backend.Controllers
             return Ok(person);
         }
 
-        // PUT: api/{companyId}/People
+        // PUT: api/{companyId}/Person
         [HttpPut]
         public async Task<IActionResult> PutPerson(string companyId, [FromBody] PersonDto personDto)
         {
@@ -84,7 +84,7 @@ namespace ShiftWork.Backend.Controllers
             person.CompanyId = companyId;
             person.Updated = DateTime.UtcNow;
 
-            var updatedPerson = await _peopleService.Update(person);
+            var updatedPerson = await _PersonService.Update(person);
             if (updatedPerson == null)
             {
                 return NotFound();
@@ -96,11 +96,11 @@ namespace ShiftWork.Backend.Controllers
             return Ok(updatedPerson);
         }
 
-        // POST: api/{companyId}/People
+        // POST: api/{companyId}/Person
         [HttpPost]
         public async Task<ActionResult<Person>> PostPerson(string companyId, [FromBody] PersonDto personDto)
         {
-            var cacheKey = $"People_{companyId}";
+            var cacheKey = $"Person_{companyId}";
 
             var person = _mapper.Map<Person>(personDto);
             person.CompanyId = companyId;
@@ -108,7 +108,7 @@ namespace ShiftWork.Backend.Controllers
             person.Updated = DateTime.UtcNow;
             person.IsActive = true;
 
-            var createdPerson = await _peopleService.Add(person);
+            var createdPerson = await _PersonService.Add(person);
             if (createdPerson == null)
             {
                 return BadRequest("Failed to create person");
@@ -118,17 +118,17 @@ namespace ShiftWork.Backend.Controllers
             return CreatedAtAction(nameof(GetPerson), new { companyId, personId = createdPerson.PersonId }, createdPerson);
         }
 
-        // DELETE: api/{companyId}/People/{personId}
+        // DELETE: api/{companyId}/Person/{personId}
         [HttpDelete("{personId}")]
         public async Task<IActionResult> DeletePerson(string companyId, int personId)
         {
-            var person  = await _peopleService.Get(companyId, personId);
+            var person  = await _PersonService.Get(companyId, personId);
             if (person == null )
             {
                 return NotFound();
             }
 
-            var isDeleted = await _peopleService.Delete(person.PersonId);
+            var isDeleted = await _PersonService.Delete(person.PersonId);
             if (!isDeleted)
             {
                 return BadRequest("Failed to delete person");

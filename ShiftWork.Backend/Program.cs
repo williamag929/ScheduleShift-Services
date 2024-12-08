@@ -40,7 +40,7 @@ builder.Services.AddScoped<IAreaService, AreaServices>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IScheduleShiftService, ScheduleShiftService>();
 builder.Services.AddScoped<ITaskShiftService, TaskShiftService>();
-builder.Services.AddScoped<IPeopleService, PeopleService>();
+builder.Services.AddScoped<IPersonService, PersonService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 
 builder.Services.AddScoped<ICompanyService, CompanyService>();

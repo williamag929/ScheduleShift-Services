@@ -30,11 +30,11 @@ namespace ShiftWork.Backend.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Person>> GetUser(string id)
         {
-          if (_context.People == null)
+          if (_context.Person == null)
           {
               return NotFound();
           }
-            var person = await _context.People.FirstAsync(c=> c.Email == id);
+            var person = await _context.Person.FirstAsync(c=> c.Email == id);
 
             if (person == null)
             {

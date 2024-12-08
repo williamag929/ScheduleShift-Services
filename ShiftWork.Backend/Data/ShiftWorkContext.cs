@@ -14,7 +14,7 @@ namespace ShiftWork.Backend.Data
         {
         }
 
-        public DbSet<ShiftWork.Backend.Models.Person> People { get; set; } = default!;
+        public DbSet<ShiftWork.Backend.Models.Person> Person { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

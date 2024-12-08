@@ -24,5 +24,8 @@
         public string PrivateKey {get;set;} = string.Empty;
         public string AvatarImage {get;set;} = string.Empty;
 
+        // Read-only property to get the full name
+        public string FullName => $"{FirstName} {LastName}";
+
     }
 }

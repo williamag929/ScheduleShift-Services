@@ -9,39 +9,39 @@ using ShiftWork.Backend.Models;
 
 namespace ShiftWork.Backend.Services
 {
-    public class PeopleService : IPeopleService
+    public class PersonService : IPersonService
     {
         private readonly ShiftWorkContext _context;
         private readonly IDistributedCache _cache;
 
-        public PeopleService(ShiftWorkContext context, IDistributedCache cache)
+        public PersonService(ShiftWorkContext context, IDistributedCache cache)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _cache = cache ?? throw new ArgumentNullException();
         }
 
-        // Get all people
+        // Get all Person
         public async Task<IEnumerable<Person>> GetAll(string companyId)
         {
             if (string.IsNullOrEmpty(companyId))
             {
                 throw new ArgumentException("Company ID cannot be null or empty", nameof(companyId));
             }
-            var cacheKey = $"people_{companyId}";
+            var cacheKey = $"Person_{companyId}";
             var cacheOptions = new DistributedCacheEntryOptions()
                .SetAbsoluteExpiration(TimeSpan.FromMinutes(20))
                .SetSlidingExpiration(TimeSpan.FromMinutes(2));
 
-            var people = await _cache.GetOrSetAsync(cacheKey,
+            var Person = await _cache.GetOrSetAsync(cacheKey,
                 async () =>
                 {
-                    return await _context.People
+                    return await _context.Person
                 .Where(p => p.CompanyId == companyId)
                 .ToListAsync();
                 },
                 cacheOptions)!;
 
-            return people;
+            return Person;
         }
 
         // Get a person by Id
@@ -52,7 +52,7 @@ namespace ShiftWork.Backend.Services
                 throw new ArgumentException("Company ID cannot be null or empty", nameof(companyId));
             }
 
-            return await _context.People.FirstOrDefaultAsync(p => p.CompanyId == companyId && p.PersonId == personId);
+            return await _context.Person.FirstOrDefaultAsync(p => p.CompanyId == companyId && p.PersonId == personId);
         }
 
         // Add a new person
@@ -63,10 +63,10 @@ namespace ShiftWork.Backend.Services
                 throw new ArgumentNullException(nameof(person));
             }
 
-            await _context.People.AddAsync(person);
+            await _context.Person.AddAsync(person);
             await _context.SaveChangesAsync();
 
-            var cacheKey = $"people_{person.CompanyId}";
+            var cacheKey = $"Person_{person.CompanyId}";
             _cache.Remove(cacheKey);
 
             return person;
@@ -80,7 +80,7 @@ namespace ShiftWork.Backend.Services
                 throw new ArgumentNullException(nameof(person));
             }
 
-            var existingPerson = await _context.People
+            var existingPerson = await _context.Person
                 .FirstOrDefaultAsync(p => p.PersonId == person.PersonId);
 
             if (existingPerson == null)
@@ -104,7 +104,7 @@ namespace ShiftWork.Backend.Services
             existingPerson.Deleted = person.Deleted;
             existingPerson.Updated = DateTime.UtcNow;
 
-            _context.People.Update(existingPerson);
+            _context.Person.Update(existingPerson);
             await _context.SaveChangesAsync();
 
             return existingPerson;
@@ -113,7 +113,7 @@ namespace ShiftWork.Backend.Services
         // Delete a person by Id
         public async Task<bool> Delete(int personId)
         {
-            var person = await _context.People
+            var person = await _context.Person
                 .FirstOrDefaultAsync(p => p.PersonId == personId);
 
             if (person == null)
@@ -121,17 +121,17 @@ namespace ShiftWork.Backend.Services
                 throw new InvalidOperationException("Person not found");
             }
 
-            _context.People.Remove(person);
+            _context.Person.Remove(person);
             await _context.SaveChangesAsync();
 
-            var cacheKey = $"people_{person.CompanyId}";
+            var cacheKey = $"Person_{person.CompanyId}";
             _cache.Remove(cacheKey);            
 
             return true;
         }
     }
 
-    public interface IPeopleService
+    public interface IPersonService
     {
         Task<IEnumerable<Person>> GetAll(string companyId);
         Task<Person> Get(string companyId, int personId);
