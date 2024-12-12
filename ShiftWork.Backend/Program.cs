@@ -81,6 +81,8 @@ builder.Services.AddCors(options =>
                       {
                           builder.WithOrigins("http://localhost:4200",
                               "https://localhost:4200",
+                              "http://localhost:32773",
+                              "https://localhost:32774",
                               "https://main.d23hrr0t3ac536.amplifyapp.com",
                               "https://williamag929-cuddly-space-garbanzo-57v9vvrg9q3px7-4200.preview.app.github.dev")
                             .AllowAnyHeader()
@@ -107,7 +109,7 @@ else
 {
     builder.Services.AddStackExchangeRedisCache(options =>
     {
-        options.Configuration = "localhost:32768";
+        options.Configuration = $"{builder.Configuration["Redis:url"]}:{builder.Configuration["Redis:port"]}";
         options.InstanceName = "shift";
     });
 }
