@@ -102,16 +102,21 @@ if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddDistributedMemoryCache(options =>
     {
-        options.SizeLimit = 2000 * 1024 * 1024; // 2000MB
+        options.SizeLimit = 200 * 1024 * 1024; // 200MB
     });
 }
 else
 {
-    builder.Services.AddStackExchangeRedisCache(options =>
+    builder.Services.AddDistributedMemoryCache(options =>
     {
-        options.Configuration = $"{builder.Configuration["Redis:url"]}:{builder.Configuration["Redis:port"]}";
-        options.InstanceName = "shift";
+        options.SizeLimit = 2000 * 1024 * 1024; // 2000MB
     });
+
+   /// builder.Services.AddStackExchangeRedisCache(options =>
+   // {
+   //     options.Configuration = $"{builder.Configuration["Redis:url"]}:{builder.Configuration["Redis:port"]}";
+   //     options.InstanceName = "shift";
+   // });
 }
 
 builder.Services.AddAWSService<IAmazonS3>(configuration.GetAWSOptions());
