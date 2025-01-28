@@ -112,11 +112,11 @@ else
         options.SizeLimit = 2000 * 1024 * 1024; // 2000MB
     });
 
-   /// builder.Services.AddStackExchangeRedisCache(options =>
-   // {
-   //     options.Configuration = $"{builder.Configuration["Redis:url"]}:{builder.Configuration["Redis:port"]}";
-   //     options.InstanceName = "shift";
-   // });
+//    builder.Services.AddStackExchangeRedisCache(options =>
+//    {
+//        options.Configuration = $"{builder.Configuration["Redis:url"]}:{builder.Configuration["Redis:port"]}";
+//        options.InstanceName = "shift";
+//    });
 }
 
 builder.Services.AddAWSService<IAmazonS3>(configuration.GetAWSOptions());
