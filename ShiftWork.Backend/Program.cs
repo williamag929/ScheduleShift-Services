@@ -62,13 +62,10 @@ builder.Services.AddAuthentication(options =>
     {
         ValidIssuer = $"{builder.Configuration["Jwt:authDomain"]}",
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:apiKey"])),
-        //IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:apiKey"])),
         ValidAudience = builder.Configuration["Jwt:projectId"],
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
-        //ValidateIssuerSigningKey = true
-        //"https://securetoken.google.com/shift-maps-location",
     };
 });
 
@@ -80,11 +77,8 @@ builder.Services.AddCors(options =>
                       builder =>
                       {
                           builder.WithOrigins("http://localhost:4200",
-                              "https://localhost:4200",
                               "http://localhost:32773",
-                              "https://localhost:32774",
-                              "https://main.d23hrr0t3ac536.amplifyapp.com",
-                              "https://williamag929-cuddly-space-garbanzo-57v9vvrg9q3px7-4200.preview.app.github.dev")
+                              "https://localhost:32774")
                             .AllowAnyHeader()
                             .AllowAnyMethod()
                             .AllowCredentials();

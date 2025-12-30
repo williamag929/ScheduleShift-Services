@@ -9,7 +9,7 @@ namespace ShiftWork.Backend.Data
 {
     public class ShiftWorkContext : DbContext
     {
-        public ShiftWorkContext (DbContextOptions<ShiftWorkContext> options)
+        public ShiftWorkContext(DbContextOptions<ShiftWorkContext> options)
             : base(options)
         {
         }
@@ -36,6 +36,9 @@ namespace ShiftWork.Backend.Data
         public DbSet<ShiftWork.Backend.Models.Country>? Countries { get; set; }
         public DbSet<ShiftWork.Backend.Models.Time_Zone>? TimeZones { get; set; }
 
+        //public DbSet<ShiftWork.Backend.User> Users { get; set; }
+        //public DbSet<ShiftWork.Backend.Shift> Shifts { get; set; }
+        //public DbSet<ShiftWork.Backend.Availability> Availabilities { get; set; }
 
 
 
